@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prayer Times</title>
+    <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+    <main id="container">
+        <header>
+            <h1 id="city-line">Prayer Times</h1>
+        </header>
+        <p id="error" class="error" hidden></p>
+        <table id="prayer-table">
+            <thead>
+                <tr>
+                    <th>Prayer</th>
+                    <th>Time</th>
+                </tr>
+            </thead>
+            <tbody id="prayer-times"></tbody>
+        </table>
+        <footer>
+            <a href="#" id="settings-link">Settings</a>
+        </footer>
+    </main>
+    <script type="module" src="popup.js"></script>
+</body>
+</html>

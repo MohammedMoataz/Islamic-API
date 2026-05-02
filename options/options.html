@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prayer Times — Settings</title>
+    <link rel="stylesheet" href="options.css">
+</head>
+<body>
+    <main class="container">
+        <h1>Prayer Times — Settings</h1>
+
+        <section class="card">
+            <h2>Location</h2>
+            <label>
+                <span>Country</span>
+                <select id="country"></select>
+            </label>
+            <label>
+                <span>City</span>
+                <select id="city"></select>
+            </label>
+            <label>
+                <span>Calculation method</span>
+                <select id="method">
+                    <option value="0">Shia Ithna-Ashari, Leva Institute, Qum</option>
+                    <option value="1">University of Islamic Sciences, Karachi</option>
+                    <option value="2">Islamic Society of North America</option>
+                    <option value="3">Muslim World League</option>
+                    <option value="4">Umm Al-Qura University, Makkah</option>
+                    <option value="5">Egyptian General Authority of Survey</option>
+                    <option value="7">Institute of Geophysics, University of Tehran</option>
+                    <option value="8">Gulf Region</option>
+                    <option value="9">Kuwait</option>
+                    <option value="10">Qatar</option>
+                    <option value="11">Majlis Ugama Islam Singapura, Singapore</option>
+                    <option value="12">Union Organization Islamic de France</option>
+                    <option value="13">Diyanet İşleri Başkanlığı, Turkey</option>
+                    <option value="14">Spiritual Administration of Muslims of Russia</option>
+                    <option value="15">Moonsighting Committee Worldwide</option>
+                </select>
+            </label>
+        </section>
+
+        <section class="card">
+            <h2>Notifications</h2>
+            <label class="row">
+                <input id="notif-enabled" type="checkbox">
+                <span>Enable prayer notifications</span>
+            </label>
+            <label>
+                <span>Remind me this many minutes <em>before</em> each prayer</span>
+                <input id="notif-pre" type="number" min="0" max="60" step="1">
+            </label>
+            <button id="test-notif" type="button" class="btn-secondary">Send test notification</button>
+        </section>
+
+        <div class="actions">
+            <button id="save-btn" type="button" class="btn-primary" disabled>Save</button>
+            <p id="status" class="status" aria-live="polite"></p>
+        </div>
+    </main>
+    <script type="module" src="options.js"></script>
+</body>
+</html>
