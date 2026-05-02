@@ -1,15 +1,19 @@
 // MV3 service worker. Schedules prayer alarms via chrome.alarms so reminders
-// fire even when the popup is closed.
+// fire even when the popup is closed, and writes a minutes-to-next-prayer
+// countdown to the toolbar badge.
 
 import { getSettings } from "./scripts/settings.js";
 import { fetchTimings } from "./scripts/api.js";
 import {
     todayAt,
     nextLocalMidnightPlus5,
+    findNextPrayer,
+    formatBadge,
     MAIN_PRAYERS
 } from "./scripts/utility.js";
 
 const ICON_URL = chrome.runtime.getURL("images/icon-128.png");
+const BADGE_COLOR = "#1a7f5a";
 
 chrome.runtime.onInstalled.addListener(() => scheduleToday());
 if (chrome.runtime.onStartup) {
@@ -20,9 +24,13 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
     if (alarm.name === "daily-refresh") {
         return scheduleToday();
     }
+    if (alarm.name === "badge-tick") {
+        return updateBadge();
+    }
     if (alarm.name.startsWith("prayer:")) {
         const name = alarm.name.slice("prayer:".length);
-        return notify(`Prayer time: ${name}`, `${name} is now.`);
+        notify(`Prayer time: ${name}`, `${name} is now.`);
+        return updateBadge();
     }
     if (alarm.name.startsWith("pre:")) {
         const [, name, mins] = alarm.name.split(":");
@@ -56,7 +64,8 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
 async function scheduleToday() {
     try {
         const settings = await getSettings();
-        const timings = await fetchTimings(settings.location);
+        const data = await fetchTimings(settings.location);
+        const timings = data.timings;
 
         await chrome.alarms.clearAll();
 
@@ -83,10 +92,30 @@ async function scheduleToday() {
             when: nextLocalMidnightPlus5(),
             periodInMinutes: 24 * 60
         });
+
+        // Toolbar countdown.
+        chrome.alarms.create("badge-tick", { periodInMinutes: 1 });
+        await updateBadge();
     } catch (err) {
         console.error("scheduleToday failed:", err);
         // Try again in 30 minutes if the network was down.
         chrome.alarms.create("daily-refresh", { delayInMinutes: 30 });
+    }
+}
+
+async function updateBadge() {
+    try {
+        const settings = await getSettings();
+        const data = await fetchTimings(settings.location);
+        const next = findNextPrayer(data.timings);
+        if (next) {
+            chrome.action.setBadgeText({ text: formatBadge(next.at - Date.now()) });
+            chrome.action.setBadgeBackgroundColor({ color: BADGE_COLOR });
+        } else {
+            chrome.action.setBadgeText({ text: "" });
+        }
+    } catch (err) {
+        console.error("updateBadge failed:", err);
     }
 }
 

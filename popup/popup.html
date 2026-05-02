@@ -10,8 +10,17 @@
     <main id="container">
         <header>
             <h1 id="city-line">Prayer Times</h1>
+            <p id="hijri-line"></p>
         </header>
+
+        <div id="countdown" class="countdown" hidden>
+            <span id="countdown-name"></span>
+            <span class="countdown-sep">in</span>
+            <span id="countdown-value" class="countdown-value"></span>
+        </div>
+
         <p id="error" class="error" hidden></p>
+
         <table id="prayer-table">
             <thead>
                 <tr>
@@ -21,6 +30,28 @@
             </thead>
             <tbody id="prayer-times"></tbody>
         </table>
+
+        <section id="qibla-card" class="qibla-card" hidden>
+            <svg class="compass" viewBox="0 0 100 100" aria-hidden="true">
+                <circle class="compass-ring" cx="50" cy="50" r="44" />
+                <text class="compass-cardinal" x="50" y="14" text-anchor="middle">N</text>
+                <text class="compass-cardinal" x="86" y="54" text-anchor="middle">E</text>
+                <text class="compass-cardinal" x="50" y="94" text-anchor="middle">S</text>
+                <text class="compass-cardinal" x="14" y="54" text-anchor="middle">W</text>
+                <g id="qibla-needle">
+                    <polygon class="needle-arrow" points="50,8 46,52 54,52" />
+                    <polygon class="needle-tail"  points="50,92 47,52 53,52" />
+                </g>
+                <circle class="compass-pin" cx="50" cy="50" r="3" />
+            </svg>
+            <div class="qibla-info">
+                <div class="qibla-label">Qibla</div>
+                <div class="qibla-degrees" id="qibla-degrees">—</div>
+                <div class="qibla-status" id="qibla-status"></div>
+                <button id="qibla-calibrate" class="qibla-calibrate" type="button" hidden>Enable live compass</button>
+            </div>
+        </section>
+
         <footer>
             <a href="#" id="settings-link">Settings</a>
         </footer>

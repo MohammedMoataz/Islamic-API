@@ -21,14 +21,57 @@ body {
     padding: 12px;
 }
 
+header {
+    text-align: center;
+    margin-bottom: 12px;
+}
+
 header h1 {
-    margin: 4px 0 12px;
+    margin: 4px 0 2px;
     font-size: 0.85rem;
     font-weight: 600;
     color: var(--muted);
     text-transform: uppercase;
     letter-spacing: 0.06em;
-    text-align: center;
+}
+
+#hijri-line {
+    margin: 0;
+    font-size: 0.78rem;
+    color: var(--muted);
+}
+
+#hijri-line:empty {
+    display: none;
+}
+
+.countdown {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: 6px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 10px;
+    padding: 10px 12px;
+    margin-bottom: 12px;
+    font-size: 0.95rem;
+}
+
+.countdown #countdown-name {
+    font-weight: 600;
+    color: var(--accent);
+}
+
+.countdown .countdown-sep {
+    color: var(--muted);
+    font-size: 0.85rem;
+}
+
+.countdown .countdown-value {
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
 }
 
 .error {
@@ -76,9 +119,126 @@ header h1 {
     color: var(--muted);
 }
 
+#prayer-table tbody tr.next td {
+    background: rgba(26, 127, 90, 0.08);
+    color: var(--fg);
+    font-weight: 600;
+}
+
+#prayer-table tbody tr.next td:first-child {
+    box-shadow: inset 3px 0 0 0 var(--accent);
+}
+
 #prayer-table tbody tr td:last-child {
     text-align: right;
     font-variant-numeric: tabular-nums;
+}
+
+.qibla-card {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 14px;
+    margin-top: 12px;
+}
+
+.compass {
+    flex: 0 0 auto;
+    width: 64px;
+    height: 64px;
+    color: var(--accent);
+    transition: transform 120ms ease-out;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.compass.draggable {
+    cursor: grab;
+    touch-action: none;
+}
+
+.compass.dragging {
+    cursor: grabbing;
+    transition: none;
+}
+
+.compass-ring {
+    fill: #fff;
+    stroke: var(--border);
+    stroke-width: 1.5;
+}
+
+.compass-cardinal {
+    font-size: 13px;
+    font-weight: 600;
+    fill: var(--muted);
+    font-family: system-ui, sans-serif;
+}
+
+#qibla-needle {
+    transform-origin: 50px 50px;
+    transition: transform 400ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.needle-arrow {
+    fill: var(--accent);
+}
+
+.needle-tail {
+    fill: #c7ccd2;
+}
+
+.compass-pin {
+    fill: var(--fg);
+}
+
+.qibla-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.qibla-label {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+    font-weight: 600;
+}
+
+.qibla-degrees {
+    font-size: 1.25rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    color: var(--fg);
+    line-height: 1.1;
+}
+
+.qibla-status {
+    font-size: 0.7rem;
+    color: var(--muted);
+    margin-top: 2px;
+    min-height: 0.9em;
+}
+
+.qibla-calibrate {
+    margin-top: 6px;
+    padding: 4px 10px;
+    background: transparent;
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    border-radius: 6px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    align-self: flex-start;
+}
+
+.qibla-calibrate:hover {
+    background: rgba(26, 127, 90, 0.08);
 }
 
 footer {
