@@ -1,4 +1,4 @@
-import { getSettings, setSettings, DEFAULT_SETTINGS } from "../scripts/settings.js";
+import { getSettings, setSettings, DEFAULT_SETTINGS, TAFSIR_EDITIONS } from "../scripts/settings.js";
 import { COUNTRIES, citiesFor } from "../scripts/locations.js";
 
 const els = {
@@ -7,6 +7,8 @@ const els = {
     method: document.getElementById("method"),
     notifEnabled: document.getElementById("notif-enabled"),
     notifPre: document.getElementById("notif-pre"),
+    tafsirSlug: document.getElementById("tafsir-slug"),
+    tafsirDefault: document.getElementById("tafsir-default"),
     saveBtn: document.getElementById("save-btn"),
     testBtn: document.getElementById("test-notif"),
     status: document.getElementById("status")
@@ -16,6 +18,7 @@ let pristine = null;       // snapshot of saved values, used to detect dirtiness
 
 (async function load() {
     populateCountries();
+    populateTafsirEditions();
     const s = await getSettings();
     applyToForm(s);
     pristine = snapshotForm();
@@ -25,6 +28,12 @@ let pristine = null;       // snapshot of saved values, used to detect dirtiness
 function populateCountries() {
     els.country.innerHTML = COUNTRIES
         .map((c) => `<option value="${escapeHtml(c.name)}">${escapeHtml(c.name)}</option>`)
+        .join("");
+}
+
+function populateTafsirEditions() {
+    els.tafsirSlug.innerHTML = TAFSIR_EDITIONS
+        .map((t) => `<option value="${escapeHtml(t.slug)}">${escapeHtml(t.language)} — ${escapeHtml(t.title)}</option>`)
         .join("");
 }
 
@@ -45,6 +54,11 @@ function applyToForm(s) {
     els.method.value = String(s.location.method);
     els.notifEnabled.checked = s.notifications.enabled;
     els.notifPre.value = String(s.notifications.preMinutes);
+    const knownSlug = TAFSIR_EDITIONS.some((t) => t.slug === s.quran.tafsirSlug)
+        ? s.quran.tafsirSlug
+        : DEFAULT_SETTINGS.quran.tafsirSlug;
+    els.tafsirSlug.value = knownSlug;
+    els.tafsirDefault.checked = s.quran.showTafsirByDefault;
 }
 
 function snapshotForm() {
@@ -53,7 +67,9 @@ function snapshotForm() {
         city: els.city.value,
         method: els.method.value,
         notifEnabled: els.notifEnabled.checked,
-        notifPre: els.notifPre.value
+        notifPre: els.notifPre.value,
+        tafsirSlug: els.tafsirSlug.value,
+        tafsirDefault: els.tafsirDefault.checked
     });
 }
 
@@ -90,6 +106,10 @@ async function save() {
                 60,
                 DEFAULT_SETTINGS.notifications.preMinutes
             )
+        },
+        quran: {
+            tafsirSlug: els.tafsirSlug.value || DEFAULT_SETTINGS.quran.tafsirSlug,
+            showTafsirByDefault: els.tafsirDefault.checked
         }
     });
     pristine = snapshotForm();
@@ -122,7 +142,7 @@ els.country.addEventListener("change", () => {
 });
 
 // Any other change just toggles dirty UI.
-[els.city, els.method, els.notifEnabled, els.notifPre].forEach((el) => {
+[els.city, els.method, els.notifEnabled, els.notifPre, els.tafsirSlug, els.tafsirDefault].forEach((el) => {
     el.addEventListener("change", updateDirtyUI);
     el.addEventListener("input", updateDirtyUI);
 });

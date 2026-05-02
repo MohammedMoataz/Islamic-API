@@ -1,8 +1,8 @@
 {
     "manifest_version": 3,
     "name": "Prayer Times Table",
-    "version": "1.2.0",
-    "description": "Prayer times with reliable notifications and a configurable city / calculation method.",
+    "version": "1.3.0",
+    "description": "Prayer times with reliable notifications, configurable city, and a Qur'an reader.",
     "icons": {
         "16": "images/icon-16.png",
         "48": "images/icon-48.png",
@@ -11,10 +11,13 @@
     "permissions": [
         "storage",
         "notifications",
-        "alarms"
+        "alarms",
+        "tabs"
     ],
     "host_permissions": [
-        "https://api.aladhan.com/*"
+        "https://api.aladhan.com/*",
+        "https://api.alquran.cloud/*",
+        "https://quranenc.com/*"
     ],
     "background": {
         "service_worker": "background.js",

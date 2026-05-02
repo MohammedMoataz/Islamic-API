@@ -249,6 +249,10 @@ document.getElementById("settings-link").addEventListener("click", (e) => {
     chrome.runtime.openOptionsPage();
 });
 
+document.getElementById("open-quran").addEventListener("click", () => {
+    chrome.tabs.create({ url: chrome.runtime.getURL("reader/reader.html") });
+});
+
 window.addEventListener("unload", () => {
     if (countdownTimer) clearInterval(countdownTimer);
 });
