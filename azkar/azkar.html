@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Azkar</title>
+    <link rel="stylesheet" href="azkar.css">
+</head>
+<body>
+    <header class="topbar">
+        <h1 class="brand">Azkar</h1>
+        <a href="#" id="open-options" class="topbar-link">Settings</a>
+    </header>
+
+    <main class="layout">
+        <aside class="sidebar">
+            <ul id="category-list" class="category-list" aria-label="Categories"></ul>
+        </aside>
+
+        <section class="reader-pane" id="reader-pane">
+            <header id="cat-header" class="cat-header" hidden>
+                <h2 id="cat-title"></h2>
+                <p id="cat-meta" class="cat-meta"></p>
+                <button id="reset-all" class="btn-reset-all" type="button">↻ Reset all</button>
+            </header>
+
+            <p id="azkar-error" class="error" hidden></p>
+            <p id="azkar-loading" class="loading">Loading…</p>
+
+            <ol id="azkar-list" class="azkar-list" aria-label="Azkar"></ol>
+        </section>
+    </main>
+
+    <script type="module" src="azkar.js"></script>
+</body>
+</html>

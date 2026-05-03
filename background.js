@@ -3,7 +3,7 @@
 // countdown to the toolbar badge.
 
 import { getSettings } from "./scripts/settings.js";
-import { fetchTimings } from "./scripts/api.js";
+import { fetchTimings, fetchTimingsStaleOk } from "./scripts/api.js";
 import {
     todayAt,
     nextLocalMidnightPlus5,
@@ -11,6 +11,9 @@ import {
     formatBadge,
     MAIN_PRAYERS
 } from "./scripts/utility.js";
+import {
+    fetchAzkar, getCounts, setCount, getNotifiedSet, markNotified, countKey
+} from "./scripts/azkar.js";
 
 const ICON_URL = chrome.runtime.getURL("images/icon-128.png");
 const BADGE_COLOR = "#1a7f5a";
@@ -39,6 +42,20 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
             `${name} is in ${mins} minute${mins === "1" ? "" : "s"}.`
         );
     }
+    if (alarm.name === "azkar-tick") {
+        return onAzkarTick();
+    }
+});
+
+// Open the azkar page on the right category when the user clicks a reminder.
+chrome.notifications.onClicked.addListener((notifId) => {
+    if (!notifId.startsWith("azkar:")) return;
+    const idx = parseInt(notifId.split(":")[1], 10);
+    const url = Number.isFinite(idx)
+        ? `azkar/azkar.html#${idx}`
+        : "azkar/azkar.html";
+    chrome.tabs.create({ url: chrome.runtime.getURL(url) });
+    chrome.notifications.clear(notifId);
 });
 
 // Re-schedule whenever the user changes settings.
@@ -155,6 +172,10 @@ async function scheduleToday() {
         // Toolbar countdown.
         chrome.alarms.create("badge-tick", { periodInMinutes: 1 });
         await updateBadge();
+
+        // Azkar reminders (opt-in). scheduleToday clearAll'd above, so always
+        // recreate the tick if enabled.
+        await ensureAzkarTick(settings);
     } catch (err) {
         console.error("scheduleToday failed:", err);
         // Try again in 30 minutes if the network was down.
@@ -162,10 +183,132 @@ async function scheduleToday() {
     }
 }
 
+// ---------------------------------------------------------------- Azkar reminders
+
+async function ensureAzkarTick(settings) {
+    await chrome.alarms.clear("azkar-tick");
+    if (!settings.azkar?.reminders?.enabled) return;
+    const avg = clampInt(settings.azkar.reminders.avgIntervalMinutes, 30, 360, 180);
+    scheduleNextAzkarTick(avg);
+}
+
+function scheduleNextAzkarTick(avgMin) {
+    // Random delay in [avg/2, avg*1.5]; spread = ±50%.
+    const half = avgMin / 2;
+    const delayMin = half + Math.random() * (avgMin);
+    chrome.alarms.create("azkar-tick", { delayInMinutes: delayMin });
+}
+
+async function onAzkarTick() {
+    // Reschedule first so the user keeps getting reminders even if the network
+    // is down or the dhikr fetch errors out.
+    let avg = 180;
+    try {
+        const settings = await getSettings();
+        if (!settings.azkar?.reminders?.enabled) return;
+        avg = clampInt(settings.azkar.reminders.avgIntervalMinutes, 30, 360, 180);
+    } finally {
+        scheduleNextAzkarTick(avg);
+    }
+
+    const kind = await activeAzkarWindow();
+    if (!kind) return;
+
+    try {
+        const azkar = await fetchAzkar();
+        const matchers = kind === "morning"
+            ? ["الصباح", "morning"]
+            : ["المساء", "evening"];
+        const idx = azkar.findIndex((g) =>
+            matchers.some((m) => (g.category || "").includes(m)));
+        if (idx < 0) return;
+        const group = azkar[idx];
+        if (!group?.items?.length) return;
+
+        // Cycle through unnotified, uncompleted dhikrs so we cover most of the
+        // category over the course of the day instead of re-firing the same
+        // random one.
+        const notified = await getNotifiedSet(kind);
+        const counts = await getCounts();
+        const eligible = group.items
+            .map((item, i) => ({ item, i }))
+            .filter(({ item, i }) => {
+                if (notified.has(i)) return false;
+                const k = countKey(group.category, i);
+                if (k in counts && counts[k] <= 0) return false;
+                return true;
+            });
+        if (eligible.length === 0) {
+            // Whole category covered for today — wait until tomorrow.
+            return;
+        }
+
+        const pick = eligible[Math.floor(Math.random() * eligible.length)];
+        const item = pick.item;
+        const text = item.zekr || "";
+        const message = text.length > 220 ? text.slice(0, 220) + "…" : text;
+        const title = kind === "morning" ? "Morning Azkar" : "Evening Azkar";
+
+        // One notification id per kind so a fresh reminder replaces the
+        // previous one rather than piling up.
+        chrome.notifications.create(`azkar:${idx}:${kind}`, {
+            type: "basic",
+            iconUrl: ICON_URL,
+            title,
+            message,
+            contextMessage: `Repeat × ${item.count}`,
+            priority: 1
+        });
+
+        // Mark the dhikr as "done" so the user doesn't have to tap-count the
+        // same one in the page, and remember we surfaced it so the next tick
+        // picks something else.
+        await markNotified(kind, pick.i);
+        await setCount(group.category, pick.i, 0);
+    } catch (err) {
+        console.warn("azkar tick: skipped", err?.message ?? err);
+    }
+}
+
+// Returns "morning" / "evening" based on prayer times when available, falling
+// back to a clock-based split if the timings request fails.
+//
+//   Morning window:  Fajr → Maghrib    (daylight)
+//   Evening window:  Maghrib → Fajr    (sunset → next sunrise)
+//
+// Reminders fire 24/7 — there's no silent period. The user explicitly wanted
+// the windows tied to actual prayer times, not to a hardcoded clock.
+async function activeAzkarWindow(now = new Date()) {
+    try {
+        const settings = await getSettings();
+        const data = await fetchTimingsStaleOk(settings.location);
+        const t = data?.timings;
+        if (typeof t?.Fajr === "string" && typeof t?.Maghrib === "string") {
+            const fajrAt = todayAt(t.Fajr);
+            const maghribAt = todayAt(t.Maghrib);
+            const nowMs = now.getTime();
+            return (nowMs >= fajrAt && nowMs < maghribAt) ? "morning" : "evening";
+        }
+    } catch (err) {
+        console.warn("activeAzkarWindow: falling back to clock split", err?.message ?? err);
+    }
+    // Clock fallback — approximate Fajr ≈ 05:00, Maghrib ≈ 18:00.
+    const minutes = now.getHours() * 60 + now.getMinutes();
+    return (minutes >= 5 * 60 && minutes < 18 * 60) ? "morning" : "evening";
+}
+
+function clampInt(raw, min, max, fallback) {
+    const n = parseInt(raw, 10);
+    if (!Number.isFinite(n)) return fallback;
+    return Math.max(min, Math.min(max, n));
+}
+
 async function updateBadge() {
     try {
         const settings = await getSettings();
-        const data = await fetchTimings(settings.location);
+        // Stale cache is fine for the badge — a slightly out-of-date countdown
+        // is better than blanking the icon during a flaky connection.
+        const data = await fetchTimingsStaleOk(settings.location);
         if (!data?.timings || typeof data.timings.Fajr !== "string") {
             console.warn("updateBadge: malformed timings, skipping");
             return;
@@ -178,7 +321,9 @@ async function updateBadge() {
             chrome.action.setBadgeText({ text: "" });
         }
     } catch (err) {
-        console.error("updateBadge failed:", err);
+        // Don't pollute the console — this fires every minute, and a transient
+        // network blip isn't actionable. Keep the previous badge text.
+        console.warn("updateBadge: skipped (network unavailable, no cache)");
     }
 }
 

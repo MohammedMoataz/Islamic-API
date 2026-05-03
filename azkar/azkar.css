@@ -1,0 +1,254 @@
+:root {
+    --bg: #f7f7f9;
+    --card: #fff;
+    --fg: #1f2329;
+    --muted: #8a8f99;
+    --accent: #1a7f5a;
+    --accent-soft: rgba(26, 127, 90, 0.08);
+    --done: #c7ccd2;
+    --border: #e4e6ea;
+    --sidebar-w: 240px;
+    --topbar-h: 52px;
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+
+html, body {
+    margin: 0;
+    height: 100%;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+.topbar {
+    height: var(--topbar-h);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.brand {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--accent);
+    letter-spacing: 0.02em;
+}
+
+.topbar-link {
+    color: var(--accent);
+    text-decoration: none;
+    font-size: 0.9rem;
+}
+.topbar-link:hover { text-decoration: underline; }
+
+.layout {
+    display: grid;
+    grid-template-columns: var(--sidebar-w) 1fr;
+    min-height: calc(100vh - var(--topbar-h));
+}
+@media (max-width: 720px) {
+    .layout { grid-template-columns: 1fr; }
+    .sidebar { border-right: none; border-bottom: 1px solid var(--border); }
+}
+
+.sidebar {
+    border-right: 1px solid var(--border);
+    background: var(--card);
+    padding: 16px 12px 24px;
+    overflow-y: auto;
+    max-height: calc(100vh - var(--topbar-h));
+    position: sticky;
+    top: var(--topbar-h);
+}
+
+.category-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.category-list li {
+    padding: 10px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    direction: rtl;
+    transition: background 0.1s ease;
+}
+.category-list li:hover { background: var(--accent-soft); }
+.category-list li.active {
+    background: var(--accent-soft);
+    color: var(--accent);
+    font-weight: 600;
+}
+
+.reader-pane {
+    padding: 28px clamp(16px, 5vw, 56px) 96px;
+    max-width: 880px;
+    margin: 0 auto;
+}
+
+.cat-header {
+    text-align: center;
+    margin-bottom: 24px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--border);
+}
+#cat-title {
+    margin: 0 0 4px;
+    font-size: 1.7rem;
+    direction: rtl;
+    font-family: "Amiri Quran", "Scheherazade New", "Traditional Arabic", serif;
+}
+.cat-meta {
+    margin: 0 0 12px;
+    color: var(--muted);
+    font-size: 0.85rem;
+}
+
+.btn-reset-all {
+    margin-top: 4px;
+    padding: 6px 14px;
+    background: var(--card);
+    color: var(--muted);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    font-size: 0.78rem;
+    cursor: pointer;
+    transition: color 0.1s, border-color 0.1s;
+}
+
+.btn-reset-all:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+}
+
+.error {
+    background: #fdecec;
+    color: #a33;
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+}
+.loading {
+    color: var(--muted);
+    font-size: 0.9rem;
+    text-align: center;
+    padding: 24px;
+}
+
+.azkar-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.dhikr {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 22px 24px;
+}
+.dhikr.done {
+    background: rgba(199, 204, 210, 0.18);
+    border-color: var(--border);
+}
+
+.dhikr-text {
+    font-family: "Amiri Quran", "Scheherazade New", "Traditional Arabic", serif;
+    font-size: 1.5rem;
+    line-height: 2.2;
+    direction: rtl;
+    color: var(--fg);
+    margin: 0 0 14px;
+    text-align: justify;
+}
+
+.dhikr-meta {
+    font-size: 0.78rem;
+    color: var(--muted);
+    margin: 0 0 16px;
+    direction: rtl;
+}
+
+.dhikr-controls {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.tasbih {
+    flex: 0 0 auto;
+    width: 88px;
+    height: 88px;
+    border-radius: 50%;
+    border: none;
+    background: var(--accent);
+    color: #fff;
+    font-size: 1.8rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(26, 127, 90, 0.18);
+    transition: transform 0.08s ease, background 0.15s ease;
+}
+.tasbih:hover {
+    transform: scale(1.04);
+}
+.tasbih:active {
+    transform: scale(0.94);
+}
+.tasbih.done {
+    background: var(--done);
+    color: var(--fg);
+    cursor: default;
+    box-shadow: none;
+}
+.tasbih.done:hover {
+    transform: none;
+}
+
+.tasbih-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+.tasbih-target {
+    font-size: 0.85rem;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+}
+.tasbih-hint {
+    font-size: 0.78rem;
+    color: var(--muted);
+}
+
+.btn-reset {
+    flex: 0 0 auto;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: var(--card);
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 0.95rem;
+    line-height: 1;
+}
+.btn-reset:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+}

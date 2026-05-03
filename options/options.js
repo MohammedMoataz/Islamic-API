@@ -12,6 +12,8 @@ const els = {
     tafsirDefault: document.getElementById("tafsir-default"),
     reciter: document.getElementById("reciter"),
     hadithBook: document.getElementById("hadith-book"),
+    azkarReminders: document.getElementById("azkar-reminders"),
+    azkarInterval: document.getElementById("azkar-interval"),
     saveBtn: document.getElementById("save-btn"),
     testBtn: document.getElementById("test-notif"),
     status: document.getElementById("status")
@@ -96,6 +98,11 @@ function applyToForm(s) {
         ? s.hadith.defaultBook
         : DEFAULT_SETTINGS.hadith.defaultBook;
     els.hadithBook.value = knownBook;
+    els.azkarReminders.checked = !!s.azkar?.reminders?.enabled;
+    const knownInterval = String(s.azkar?.reminders?.avgIntervalMinutes ?? DEFAULT_SETTINGS.azkar.reminders.avgIntervalMinutes);
+    if ([...els.azkarInterval.options].some((o) => o.value === knownInterval)) {
+        els.azkarInterval.value = knownInterval;
+    }
 }
 
 function snapshotForm() {
@@ -108,7 +115,9 @@ function snapshotForm() {
         tafsirSlug: els.tafsirSlug.value,
         tafsirDefault: els.tafsirDefault.checked,
         reciter: els.reciter.value,
-        hadithBook: els.hadithBook.value
+        hadithBook: els.hadithBook.value,
+        azkarReminders: els.azkarReminders.checked,
+        azkarInterval: els.azkarInterval.value
     });
 }
 
@@ -155,6 +164,16 @@ async function save() {
         },
         hadith: {
             defaultBook: els.hadithBook.value || DEFAULT_SETTINGS.hadith.defaultBook
+        },
+        azkar: {
+            reminders: {
+                enabled: els.azkarReminders.checked,
+                avgIntervalMinutes: clampInt(
+                    els.azkarInterval.value,
+                    30, 360,
+                    DEFAULT_SETTINGS.azkar.reminders.avgIntervalMinutes
+                )
+            }
         }
     });
     pristine = snapshotForm();
@@ -187,7 +206,7 @@ els.country.addEventListener("change", () => {
 });
 
 // Any other change just toggles dirty UI.
-[els.city, els.method, els.notifEnabled, els.notifPre, els.tafsirSlug, els.tafsirDefault, els.reciter, els.hadithBook].forEach((el) => {
+[els.city, els.method, els.notifEnabled, els.notifPre, els.tafsirSlug, els.tafsirDefault, els.reciter, els.hadithBook, els.azkarReminders, els.azkarInterval].forEach((el) => {
     el.addEventListener("change", updateDirtyUI);
     el.addEventListener("input", updateDirtyUI);
 });

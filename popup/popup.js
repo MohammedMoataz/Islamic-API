@@ -293,6 +293,10 @@ document.getElementById("open-hadith").addEventListener("click", () => {
     chrome.tabs.create({ url: chrome.runtime.getURL("hadith/hadith.html") });
 });
 
+document.getElementById("open-azkar").addEventListener("click", () => {
+    chrome.tabs.create({ url: chrome.runtime.getURL("azkar/azkar.html") });
+});
+
 // ---------------------------------------------------------------- Audio mini
 
 let audioPlaying = false;

@@ -41,6 +41,21 @@ export async function fetchTimings({ city, country, method }, date = new Date())
     return result;
 }
 
+// Wrapper used by non-critical callers (toolbar badge) — falls back to a
+// stale cache entry when the network is unreachable, so a flaky connection
+// doesn't blank the UI.
+export async function fetchTimingsStaleOk(location, date = new Date()) {
+    try {
+        return await fetchTimings(location, date);
+    } catch (err) {
+        const dateStr = `${location.city}:${location.country}:${location.method}:${localDateKey(date)}`;
+        const cacheKey = `timings:v2:${dateStr}`;
+        const stale = await cacheGet(cacheKey, { staleOk: true });
+        if (isValidTimingsCache(stale)) return stale;
+        throw err;
+    }
+}
+
 function isValidTimingsCache(cached) {
     return (
         cached &&
