@@ -1,5 +1,6 @@
 import { getSettings, setSettings, DEFAULT_SETTINGS, TAFSIR_EDITIONS } from "../scripts/settings.js";
 import { COUNTRIES, citiesFor } from "../scripts/locations.js";
+import { fetchReciters } from "../scripts/quran-audio.js";
 
 const els = {
     country: document.getElementById("country"),
@@ -9,6 +10,7 @@ const els = {
     notifPre: document.getElementById("notif-pre"),
     tafsirSlug: document.getElementById("tafsir-slug"),
     tafsirDefault: document.getElementById("tafsir-default"),
+    reciter: document.getElementById("reciter"),
     saveBtn: document.getElementById("save-btn"),
     testBtn: document.getElementById("test-notif"),
     status: document.getElementById("status")
@@ -21,6 +23,16 @@ let pristine = null;       // snapshot of saved values, used to detect dirtiness
     populateTafsirEditions();
     const s = await getSettings();
     applyToForm(s);
+
+    // Reciter list comes from the network — populate it after the rest of the
+    // form is up so the page isn't gated on it.
+    fetchReciters().then((reciters) => {
+        populateReciters(reciters, s.audio?.reciterId ?? DEFAULT_SETTINGS.audio.reciterId);
+        // If the user hasn't touched anything, refresh the pristine snapshot
+        // so opening + closing doesn't look "dirty".
+        if (!isDirty()) pristine = snapshotForm();
+    }).catch((err) => console.error("fetchReciters:", err));
+
     pristine = snapshotForm();
     updateDirtyUI();
 })();
@@ -35,6 +47,19 @@ function populateTafsirEditions() {
     els.tafsirSlug.innerHTML = TAFSIR_EDITIONS
         .map((t) => `<option value="${escapeHtml(t.slug)}">${escapeHtml(t.language)} — ${escapeHtml(t.title)}</option>`)
         .join("");
+}
+
+function populateReciters(reciters, selectedId) {
+    els.reciter.innerHTML = reciters
+        .map((r) => {
+            const label = r.translated_name?.name || r.reciter_name || `Reciter ${r.id}`;
+            const style = r.style ? ` (${escapeHtml(r.style)})` : "";
+            return `<option value="${r.id}">${escapeHtml(label)}${style}</option>`;
+        })
+        .join("");
+    if (reciters.some((r) => r.id === selectedId)) {
+        els.reciter.value = String(selectedId);
+    }
 }
 
 function populateCities(countryName, preferredCity) {
@@ -69,7 +94,8 @@ function snapshotForm() {
         notifEnabled: els.notifEnabled.checked,
         notifPre: els.notifPre.value,
         tafsirSlug: els.tafsirSlug.value,
-        tafsirDefault: els.tafsirDefault.checked
+        tafsirDefault: els.tafsirDefault.checked,
+        reciter: els.reciter.value
     });
 }
 
@@ -110,6 +136,9 @@ async function save() {
         quran: {
             tafsirSlug: els.tafsirSlug.value || DEFAULT_SETTINGS.quran.tafsirSlug,
             showTafsirByDefault: els.tafsirDefault.checked
+        },
+        audio: {
+            reciterId: parseInt(els.reciter.value, 10) || DEFAULT_SETTINGS.audio.reciterId
         }
     });
     pristine = snapshotForm();
@@ -142,7 +171,7 @@ els.country.addEventListener("change", () => {
 });
 
 // Any other change just toggles dirty UI.
-[els.city, els.method, els.notifEnabled, els.notifPre, els.tafsirSlug, els.tafsirDefault].forEach((el) => {
+[els.city, els.method, els.notifEnabled, els.notifPre, els.tafsirSlug, els.tafsirDefault, els.reciter].forEach((el) => {
     el.addEventListener("change", updateDirtyUI);
     el.addEventListener("input", updateDirtyUI);
 });

@@ -3,8 +3,25 @@
 export const DEFAULT_SETTINGS = {
     location: { city: "Cairo", country: "Egypt", method: 5 },
     notifications: { enabled: true, preMinutes: 5 },
-    quran: { tafsirSlug: "arabic_moyassar", showTafsirByDefault: false }
+    quran: { tafsirSlug: "arabic_moyassar", showTafsirByDefault: false },
+    audio: { reciterId: 7 }   // Mishary Rashid Alafasy
 };
+
+// Used as a seed when api.quran.com /resources/recitations is unreachable.
+// Ids match the canonical v4 reciters; see https://api.quran.com/api/v4/resources/recitations
+export const RECITER_FALLBACKS = [
+    { id: 1,  reciter_name: "AbdulBaset AbdulSamad",          style: "Mujawwad" },
+    { id: 2,  reciter_name: "AbdulBaset AbdulSamad",          style: "Murattal" },
+    { id: 3,  reciter_name: "Abdur-Rahman as-Sudais",         style: "Murattal" },
+    { id: 4,  reciter_name: "Abu Bakr al-Shatri",             style: "Murattal" },
+    { id: 5,  reciter_name: "Hani ar-Rifai",                  style: "Murattal" },
+    { id: 6,  reciter_name: "Mahmoud Khalil al-Husary",       style: "Murattal" },
+    { id: 7,  reciter_name: "Mishary Rashid al-Afasy",        style: "Murattal" },
+    { id: 8,  reciter_name: "Mohamed Siddiq al-Minshawi",     style: "Mujawwad" },
+    { id: 9,  reciter_name: "Mohamed Siddiq al-Minshawi",     style: "Murattal" },
+    { id: 10, reciter_name: "Sa'ud ash-Shuraim",              style: "Murattal" },
+    { id: 12, reciter_name: "Mohammad al-Tablawi",            style: "Murattal" }
+];
 
 // Catalogue used by the options page and the reader. Slugs match
 // quranenc.com's translation IDs.

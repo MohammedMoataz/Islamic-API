@@ -37,6 +37,7 @@
                 <div class="basmala" id="basmala">﷽</div>
                 <h2 class="surah-name-ar" id="surah-name-ar"></h2>
                 <p class="surah-meta" id="surah-meta"></p>
+                <button id="play-surah" type="button" class="btn-listen">▶ Listen</button>
             </header>
 
             <p id="reader-error" class="error" hidden></p>
@@ -45,6 +46,20 @@
             <ol id="ayat" class="ayat" aria-label="Ayat"></ol>
         </section>
     </main>
+
+    <div id="player" class="player" hidden role="region" aria-label="Audio player">
+        <button id="player-toggle" type="button" class="player-btn player-toggle" aria-label="Play / pause">▶</button>
+        <div class="player-info">
+            <div class="player-title" id="player-title">—</div>
+            <div class="player-time">
+                <span id="player-current">0:00</span>
+                <span class="player-time-sep">/</span>
+                <span id="player-duration">0:00</span>
+            </div>
+        </div>
+        <input id="player-seek" class="player-seek" type="range" min="0" max="100" step="0.1" value="0" aria-label="Seek">
+        <button id="player-stop" type="button" class="player-btn" aria-label="Stop">✕</button>
+    </div>
 
     <script type="module" src="reader.js"></script>
 </body>

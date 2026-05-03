@@ -4,6 +4,10 @@ import {
     getBookmarks, isBookmarked, toggleBookmark
 } from "../scripts/bookmarks.js";
 import { getLastRead, setLastRead } from "../scripts/last-read.js";
+import {
+    playSurah, pauseAudio, resumeAudio, stopAudio, seekAudio,
+    getAudioState, onAudioState
+} from "../scripts/audio-controller.js";
 
 const els = {
     list: document.getElementById("surah-list"),
@@ -22,7 +26,15 @@ const els = {
     resumeText: document.getElementById("resume-text"),
     resumeGo: document.getElementById("resume-go"),
     resumeDismiss: document.getElementById("resume-dismiss"),
-    openOptions: document.getElementById("open-options")
+    openOptions: document.getElementById("open-options"),
+    playSurahBtn: document.getElementById("play-surah"),
+    player: document.getElementById("player"),
+    playerToggle: document.getElementById("player-toggle"),
+    playerStop: document.getElementById("player-stop"),
+    playerTitle: document.getElementById("player-title"),
+    playerCurrent: document.getElementById("player-current"),
+    playerDuration: document.getElementById("player-duration"),
+    playerSeek: document.getElementById("player-seek")
 };
 
 const state = {
@@ -32,7 +44,18 @@ const state = {
     tafsirSlug: "arabic_moyassar",
     showTafsirByDefault: false,
     expandedTafsir: new Set(),  // ayah numbers (within current surah)
-    bookmarks: []
+    bookmarks: [],
+    reciterId: 7,
+    audio: {                // mirror of last broadcast from offscreen
+        playing: false,
+        loading: false,
+        surah: null,
+        title: "",
+        currentTime: 0,
+        duration: 0,
+        ended: false
+    },
+    seekDragging: false
 };
 
 (async function init() {
@@ -45,11 +68,13 @@ const state = {
 
     state.tafsirSlug = settings.quran.tafsirSlug;
     state.showTafsirByDefault = settings.quran.showTafsirByDefault;
+    state.reciterId = settings.audio?.reciterId ?? 7;
     state.surahList = list;
     state.bookmarks = bookmarks;
 
     renderSurahList();
     renderBookmarks();
+    setupAudio();
 
     const fromHash = parseHash();
     if (fromHash) {
@@ -352,4 +377,90 @@ chrome.storage.onChanged.addListener((changes, area) => {
             }
         }
     }
+    if (area === "sync" && changes.settings?.newValue?.audio?.reciterId) {
+        state.reciterId = changes.settings.newValue.audio.reciterId;
+    }
 });
+
+// ----------------------------------------------------------------- Audio
+
+function setupAudio() {
+    els.playSurahBtn.addEventListener("click", onListenClick);
+    els.playerToggle.addEventListener("click", () => {
+        if (state.audio.playing) pauseAudio();
+        else if (state.audio.surah) resumeAudio();
+    });
+    els.playerStop.addEventListener("click", () => stopAudio());
+    els.playerSeek.addEventListener("input", () => { state.seekDragging = true; });
+    els.playerSeek.addEventListener("change", () => {
+        const pct = Number(els.playerSeek.value) / 100;
+        const t = pct * (state.audio.duration || 0);
+        seekAudio(t);
+        state.seekDragging = false;
+    });
+
+    onAudioState(applyAudioState);
+
+    // If we returned to the reader while audio was already playing, sync now.
+    getAudioState().then((s) => { if (s) applyAudioState(s); });
+}
+
+async function onListenClick() {
+    const data = state.currentSurahData;
+    if (!data) return;
+    // Toggle behaviour: if already playing this surah, pause/resume.
+    if (state.audio.surah === data.number) {
+        if (state.audio.playing) return pauseAudio();
+        return resumeAudio();
+    }
+    const title = `${data.englishName} · Surah ${data.number}`;
+    els.playSurahBtn.disabled = true;
+    els.playSurahBtn.textContent = "Loading…";
+    try {
+        await playSurah(state.reciterId, data.number, title);
+    } catch (err) {
+        console.error(err);
+        els.playSurahBtn.textContent = "▶ Listen";
+    } finally {
+        els.playSurahBtn.disabled = false;
+    }
+}
+
+function applyAudioState(audioState) {
+    state.audio = audioState;
+    const hasTrack = audioState.surah !== null;
+    els.player.hidden = !hasTrack;
+    document.body.classList.toggle("has-player", hasTrack);
+
+    els.playerToggle.textContent = audioState.playing ? "⏸" : (audioState.loading ? "…" : "▶");
+    els.playerTitle.textContent = audioState.title || "—";
+    els.playerCurrent.textContent = formatClock(audioState.currentTime);
+    els.playerDuration.textContent = formatClock(audioState.duration);
+
+    if (!state.seekDragging) {
+        const pct = audioState.duration > 0
+            ? (audioState.currentTime / audioState.duration) * 100
+            : 0;
+        els.playerSeek.value = String(pct);
+    }
+
+    // Surah-level Listen button label.
+    if (els.playSurahBtn && state.currentSurahData) {
+        const isThis = audioState.surah === state.currentSurahData.number;
+        els.playSurahBtn.classList.toggle("playing", isThis && audioState.playing);
+        if (isThis && audioState.playing) {
+            els.playSurahBtn.textContent = "⏸ Pause";
+        } else if (isThis && audioState.loading) {
+            els.playSurahBtn.textContent = "Loading…";
+        } else {
+            els.playSurahBtn.textContent = "▶ Listen";
+        }
+    }
+}
+
+function formatClock(seconds) {
+    if (!Number.isFinite(seconds) || seconds < 0) return "0:00";
+    const m = Math.floor(seconds / 60);
+    const s = Math.floor(seconds % 60);
+    return `${m}:${String(s).padStart(2, "0")}`;
+}

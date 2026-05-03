@@ -7,6 +7,9 @@ import {
     formatDateLine,
     MAIN_PRAYERS
 } from "../scripts/utility.js";
+import {
+    pauseAudio, resumeAudio, stopAudio, getAudioState, onAudioState
+} from "../scripts/audio-controller.js";
 
 const els = {
     tableBody: document.getElementById("prayer-times"),
@@ -20,7 +23,12 @@ const els = {
     qiblaNeedle: document.getElementById("qibla-needle"),
     qiblaDegrees: document.getElementById("qibla-degrees"),
     qiblaStatus: document.getElementById("qibla-status"),
-    qiblaCalibrate: document.getElementById("qibla-calibrate")
+    qiblaCalibrate: document.getElementById("qibla-calibrate"),
+    audioMini: document.getElementById("audio-mini"),
+    audioMiniToggle: document.getElementById("audio-mini-toggle"),
+    audioMiniStop: document.getElementById("audio-mini-stop"),
+    audioMiniTitle: document.getElementById("audio-mini-title"),
+    audioMiniTime: document.getElementById("audio-mini-time")
 };
 
 let countdownTimer = null;
@@ -31,6 +39,9 @@ let countdownTimer = null;
         els.cityLine.textContent = `${settings.location.city}, ${settings.location.country}`;
 
         const data = await fetchTimings(settings.location);
+        if (!data?.timings || typeof data.timings.Fajr !== "string") {
+            throw new Error("fetchTimings returned malformed payload");
+        }
         els.hijriLine.textContent = formatDateLine(data.date);
         renderTable(data.timings);
         startCountdown(data.timings);
@@ -252,6 +263,38 @@ document.getElementById("settings-link").addEventListener("click", (e) => {
 document.getElementById("open-quran").addEventListener("click", () => {
     chrome.tabs.create({ url: chrome.runtime.getURL("reader/reader.html") });
 });
+
+// ---------------------------------------------------------------- Audio mini
+
+let audioPlaying = false;
+
+els.audioMiniToggle.addEventListener("click", () => {
+    if (audioPlaying) pauseAudio();
+    else resumeAudio();
+});
+els.audioMiniStop.addEventListener("click", () => stopAudio());
+
+onAudioState(applyAudioMini);
+getAudioState().then((s) => { if (s) applyAudioMini(s); });
+
+function applyAudioMini(s) {
+    audioPlaying = s.playing;
+    const hasTrack = s.surah !== null && !s.ended;
+    els.audioMini.hidden = !hasTrack;
+    if (!hasTrack) return;
+
+    els.audioMiniToggle.textContent = s.playing ? "⏸" : (s.loading ? "…" : "▶");
+    els.audioMiniTitle.textContent = s.title || "—";
+    els.audioMiniTime.textContent =
+        `${formatClock(s.currentTime)} / ${formatClock(s.duration)}`;
+}
+
+function formatClock(seconds) {
+    if (!Number.isFinite(seconds) || seconds < 0) return "0:00";
+    const m = Math.floor(seconds / 60);
+    const sec = Math.floor(seconds % 60);
+    return `${m}:${String(sec).padStart(2, "0")}`;
+}
 
 window.addEventListener("unload", () => {
     if (countdownTimer) clearInterval(countdownTimer);

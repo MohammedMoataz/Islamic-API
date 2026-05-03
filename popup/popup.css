@@ -244,6 +244,70 @@ header h1 {
     background: rgba(26, 127, 90, 0.08);
 }
 
+.audio-mini {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 10px;
+    padding: 8px 10px;
+    margin-top: 12px;
+}
+
+.audio-mini-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.audio-mini-title {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--fg);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.audio-mini-time {
+    font-size: 0.7rem;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+    margin-top: 2px;
+}
+
+.audio-mini-btn {
+    flex: 0 0 auto;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--fg);
+    cursor: pointer;
+    font-size: 0.85rem;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.audio-mini-btn:hover {
+    background: rgba(26, 127, 90, 0.08);
+}
+
+.audio-mini-toggle {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+}
+
+.audio-mini-toggle:hover {
+    filter: brightness(0.95);
+    background: var(--accent);
+}
+
 .btn-read-quran {
     display: block;
     width: 100%;

@@ -13,11 +13,12 @@ const QIBLA_TTL = 30 * 24 * 60 * 60 * 1000;    // 30 days — qibla direction is
 //   meta:    { latitude, longitude, timezone, method }
 export async function fetchTimings({ city, country, method }, date = new Date()) {
     const dateStr = formatDateAladhan(date);
-    const cacheKey = `timings:${city}:${country}:${method}:${localDateKey(date)}`;
+    // The "v2" segment retires every cache entry written before the Phase-1
+    // shape change so we can never accidentally trust a stale Phase-0 dict.
+    const cacheKey = `timings:v2:${city}:${country}:${method}:${localDateKey(date)}`;
 
     const cached = await cacheGet(cacheKey);
-    // Ignore Phase-0-shaped cache entries (raw timings dict without wrapper).
-    if (cached && cached.timings && cached.date && cached.meta) return cached;
+    if (isValidTimingsCache(cached)) return cached;
 
     const url =
         `https://api.aladhan.com/v1/timingsByCity/${dateStr}` +
@@ -38,6 +39,18 @@ export async function fetchTimings({ city, country, method }, date = new Date())
     };
     await cacheSet(cacheKey, result, TIMINGS_TTL);
     return result;
+}
+
+function isValidTimingsCache(cached) {
+    return (
+        cached &&
+        typeof cached === "object" &&
+        cached.timings &&
+        typeof cached.timings === "object" &&
+        typeof cached.timings.Fajr === "string" &&
+        cached.date &&
+        cached.meta
+    );
 }
 
 // Returns the qibla bearing in degrees clockwise from True North.

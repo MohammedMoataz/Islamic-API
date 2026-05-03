@@ -233,9 +233,30 @@ html, body {
 }
 
 .surah-meta {
-    margin: 0;
+    margin: 0 0 12px;
     color: var(--muted);
     font-size: 0.9rem;
+}
+
+.btn-listen {
+    margin-top: 4px;
+    padding: 8px 18px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 999px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: filter 0.1s, background 0.1s;
+}
+
+.btn-listen:hover {
+    filter: brightness(0.95);
+}
+
+.btn-listen.playing {
+    background: #b85c2e;
 }
 
 .error {
@@ -378,3 +399,99 @@ html, body {
 }
 
 .resume-banner button.icon-btn:hover { color: var(--fg); }
+
+/* Mini player ------------------------------------------------------------- */
+.player {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 50;
+    background: var(--card);
+    border-top: 1px solid var(--border);
+    padding: 10px 18px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.06);
+}
+
+.player-btn {
+    flex: 0 0 auto;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--fg);
+    font-size: 0.95rem;
+    cursor: pointer;
+}
+
+.player-btn:hover { background: var(--accent-soft); }
+
+.player-toggle {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+}
+
+.player-toggle:hover {
+    filter: brightness(0.95);
+    background: var(--accent);
+}
+
+.player-info {
+    flex: 0 1 220px;
+    min-width: 0;
+}
+
+.player-title {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--fg);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.player-time {
+    font-size: 0.75rem;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+}
+
+.player-time-sep {
+    margin: 0 4px;
+    opacity: 0.5;
+}
+
+.player-seek {
+    flex: 1 1 auto;
+    -webkit-appearance: none;
+    appearance: none;
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    cursor: pointer;
+}
+
+.player-seek::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--accent);
+    cursor: pointer;
+    box-shadow: 0 0 0 2px var(--card);
+}
+
+.player-seek:focus {
+    outline: none;
+}
+
+/* Push the page bottom padding up so content isn't covered by the player. */
+body.has-player .reader-pane {
+    padding-bottom: 96px;
+}

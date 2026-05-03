@@ -48,7 +48,8 @@ chrome.storage.onChanged.addListener((changes, area) => {
     }
 });
 
-// Allow the options page to fire a test notification on demand.
+// Allow the options page to fire a test notification on demand,
+// and orchestrate the offscreen audio document.
 chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
     if (msg?.type === "test-notification") {
         notify("Test notification", "If you can see this, notifications are working.");
@@ -59,13 +60,71 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
         scheduleToday().then(() => sendResponse({ ok: true }));
         return true;
     }
+    if (msg?.type === "audio:ensure") {
+        ensureOffscreen().then(() => sendResponse({ ok: true })).catch((err) => {
+            console.error("ensureOffscreen failed:", err);
+            sendResponse({ ok: false, error: String(err) });
+        });
+        return true;
+    }
+    // Tear the offscreen document down once playback truly ends or is stopped.
+    if (msg?.type === "audio:state") {
+        const s = msg.state;
+        if (s && !s.playing && !s.loading && (s.ended || s.surah === null)) {
+            scheduleOffscreenClose();
+        } else {
+            cancelOffscreenClose();
+        }
+    }
 });
+
+const OFFSCREEN_PATH = "offscreen/offscreen.html";
+
+async function ensureOffscreen() {
+    if (await hasOffscreen()) return;
+    await chrome.offscreen.createDocument({
+        url: OFFSCREEN_PATH,
+        reasons: ["AUDIO_PLAYBACK"],
+        justification: "Qur'an recitation playback that survives popup and tab close."
+    });
+}
+
+async function hasOffscreen() {
+    if (chrome.offscreen?.hasDocument) {
+        try { return await chrome.offscreen.hasDocument(); } catch { /* fall through */ }
+    }
+    try {
+        const matched = await chrome.runtime.getContexts({
+            contextTypes: ["OFFSCREEN_DOCUMENT"],
+            documentUrls: [chrome.runtime.getURL(OFFSCREEN_PATH)]
+        });
+        return matched.length > 0;
+    } catch {
+        return false;
+    }
+}
+
+let closeTimer = null;
+function scheduleOffscreenClose() {
+    cancelOffscreenClose();
+    closeTimer = setTimeout(async () => {
+        if (await hasOffscreen()) {
+            try { await chrome.offscreen.closeDocument(); } catch { /* already closed */ }
+        }
+    }, 500);
+}
+function cancelOffscreenClose() {
+    if (closeTimer) { clearTimeout(closeTimer); closeTimer = null; }
+}
 
 async function scheduleToday() {
     try {
         const settings = await getSettings();
         const data = await fetchTimings(settings.location);
-        const timings = data.timings;
+        const timings = data?.timings;
+        if (!timings || typeof timings.Fajr !== "string") {
+            throw new Error("fetchTimings returned malformed payload");
+        }
 
         await chrome.alarms.clearAll();
 
@@ -107,6 +166,10 @@ async function updateBadge() {
     try {
         const settings = await getSettings();
         const data = await fetchTimings(settings.location);
+        if (!data?.timings || typeof data.timings.Fajr !== "string") {
+            console.warn("updateBadge: malformed timings, skipping");
+            return;
+        }
         const next = findNextPrayer(data.timings);
         if (next) {
             chrome.action.setBadgeText({ text: formatBadge(next.at - Date.now()) });
