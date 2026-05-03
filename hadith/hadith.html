@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hadith</title>
+    <link rel="stylesheet" href="hadith.css">
+</head>
+<body>
+    <header class="topbar">
+        <h1 class="brand">Hadith</h1>
+        <a href="#" id="open-options" class="topbar-link">Settings</a>
+    </header>
+
+    <main class="layout">
+        <aside class="sidebar">
+            <details class="bookmarks-panel" open>
+                <summary>Bookmarks <span id="bookmarks-count" class="count"></span></summary>
+                <ul id="bookmarks-list" class="bookmarks-list"></ul>
+            </details>
+
+            <ul id="book-list" class="book-list" aria-label="List of collections"></ul>
+        </aside>
+
+        <section class="reader-pane" id="reader-pane">
+            <header id="book-header" class="book-header" hidden>
+                <h2 id="book-title"></h2>
+                <p id="book-meta" class="book-meta"></p>
+            </header>
+
+            <nav id="pager" class="pager" hidden>
+                <button id="page-prev" type="button">‹ Prev</button>
+                <span id="page-info"></span>
+                <button id="page-next" type="button">Next ›</button>
+            </nav>
+
+            <p id="hadith-error" class="error" hidden></p>
+            <p id="hadith-loading" class="loading">Loading…</p>
+
+            <ol id="hadiths" class="hadith-list" aria-label="Hadiths"></ol>
+        </section>
+    </main>
+
+    <script type="module" src="hadith.js"></script>
+</body>
+</html>

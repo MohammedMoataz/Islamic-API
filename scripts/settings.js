@@ -4,8 +4,22 @@ export const DEFAULT_SETTINGS = {
     location: { city: "Cairo", country: "Egypt", method: 5 },
     notifications: { enabled: true, preMinutes: 5 },
     quran: { tafsirSlug: "arabic_moyassar", showTafsirByDefault: false },
-    audio: { reciterId: 7 }   // Mishary Rashid Alafasy
+    audio: { reciterId: 7 },   // Mishary Rashid Alafasy
+    hadith: { defaultBook: "bukhari" }
 };
+
+// hadis-api-id.vercel.app book slugs + canonical names + collection sizes.
+export const HADITH_BOOKS = [
+    { slug: "bukhari",    name: "Sahih al-Bukhari",    total: 7563  },
+    { slug: "muslim",     name: "Sahih Muslim",        total: 5362  },
+    { slug: "abu-dawud",  name: "Sunan Abu Dawud",     total: 4590  },
+    { slug: "tirmidzi",   name: "Jami' at-Tirmidhi",   total: 3956  },
+    { slug: "nasai",      name: "Sunan an-Nasa'i",     total: 5662  },
+    { slug: "ibnu-majah", name: "Sunan Ibn Majah",     total: 4332  },
+    { slug: "malik",      name: "Muwatta Malik",       total: 1851  },
+    { slug: "ahmad",      name: "Musnad Ahmad",        total: 26363 },
+    { slug: "darimi",     name: "Sunan ad-Darimi",     total: 3367  }
+];
 
 // Used as a seed when api.quran.com /resources/recitations is unreachable.
 // Ids match the canonical v4 reciters; see https://api.quran.com/api/v4/resources/recitations

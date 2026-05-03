@@ -10,6 +10,7 @@ import {
 import {
     pauseAudio, resumeAudio, stopAudio, getAudioState, onAudioState
 } from "../scripts/audio-controller.js";
+import { dailyHadith, bookTitle } from "../scripts/hadith.js";
 
 const els = {
     tableBody: document.getElementById("prayer-times"),
@@ -28,7 +29,11 @@ const els = {
     audioMiniToggle: document.getElementById("audio-mini-toggle"),
     audioMiniStop: document.getElementById("audio-mini-stop"),
     audioMiniTitle: document.getElementById("audio-mini-title"),
-    audioMiniTime: document.getElementById("audio-mini-time")
+    audioMiniTime: document.getElementById("audio-mini-time"),
+    hadithCard: document.getElementById("hadith-card"),
+    hadithCardMeta: document.getElementById("hadith-card-meta"),
+    hadithCardArab: document.getElementById("hadith-card-arab"),
+    hadithCardId: document.getElementById("hadith-card-id")
 };
 
 let countdownTimer = null;
@@ -49,12 +54,32 @@ let countdownTimer = null;
         if (data.meta?.latitude !== undefined && data.meta?.longitude !== undefined) {
             renderQibla(data.meta.latitude, data.meta.longitude).catch(console.error);
         }
+
+        // Hadith of the Day — non-blocking; failure just hides the card.
+        renderDailyHadith(settings.hadith.defaultBook).catch((err) => {
+            console.warn("dailyHadith failed:", err);
+            els.hadithCard.hidden = true;
+        });
     } catch (err) {
         console.error(err);
         els.error.hidden = false;
         els.error.textContent = "Failed to load prayer times. Check your connection or settings.";
     }
 })();
+
+async function renderDailyHadith(book) {
+    const { hadith, number } = await dailyHadith(book);
+    if (!hadith) return;
+    els.hadithCard.hidden = false;
+    els.hadithCardMeta.textContent = `${bookTitle(book)} #${hadith.number || number}`;
+    els.hadithCardArab.textContent = hadith.arab || "";
+    els.hadithCardId.textContent = hadith.id || "";
+    els.hadithCard.onclick = () => {
+        chrome.tabs.create({
+            url: chrome.runtime.getURL(`hadith/hadith.html#${book}:${hadith.number || number}`)
+        });
+    };
+}
 
 function renderTable(timings) {
     els.tableBody.innerHTML = "";
@@ -262,6 +287,10 @@ document.getElementById("settings-link").addEventListener("click", (e) => {
 
 document.getElementById("open-quran").addEventListener("click", () => {
     chrome.tabs.create({ url: chrome.runtime.getURL("reader/reader.html") });
+});
+
+document.getElementById("open-hadith").addEventListener("click", () => {
+    chrome.tabs.create({ url: chrome.runtime.getURL("hadith/hadith.html") });
 });
 
 // ---------------------------------------------------------------- Audio mini

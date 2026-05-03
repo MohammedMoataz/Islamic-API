@@ -1,0 +1,309 @@
+:root {
+    --bg: #f7f7f9;
+    --card: #fff;
+    --fg: #1f2329;
+    --muted: #8a8f99;
+    --accent: #1a7f5a;
+    --accent-soft: rgba(26, 127, 90, 0.08);
+    --border: #e4e6ea;
+    --sidebar-w: 260px;
+    --topbar-h: 52px;
+}
+
+* { box-sizing: border-box; }
+
+[hidden] { display: none !important; }
+
+html, body {
+    margin: 0;
+    height: 100%;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+/* Topbar ------------------------------------------------------------------ */
+.topbar {
+    height: var(--topbar-h);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.brand {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--accent);
+    letter-spacing: 0.02em;
+}
+
+.topbar-link {
+    color: var(--accent);
+    text-decoration: none;
+    font-size: 0.9rem;
+}
+
+.topbar-link:hover { text-decoration: underline; }
+
+/* Layout ------------------------------------------------------------------ */
+.layout {
+    display: grid;
+    grid-template-columns: var(--sidebar-w) 1fr;
+    min-height: calc(100vh - var(--topbar-h));
+}
+
+@media (max-width: 720px) {
+    .layout { grid-template-columns: 1fr; }
+    .sidebar { border-right: none; border-bottom: 1px solid var(--border); }
+}
+
+/* Sidebar ----------------------------------------------------------------- */
+.sidebar {
+    border-right: 1px solid var(--border);
+    background: var(--card);
+    padding: 16px 12px 24px;
+    overflow-y: auto;
+    max-height: calc(100vh - var(--topbar-h));
+    position: sticky;
+    top: var(--topbar-h);
+}
+
+.bookmarks-panel {
+    margin-bottom: 14px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 8px 12px;
+}
+
+.bookmarks-panel summary {
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 600;
+    list-style: none;
+    user-select: none;
+}
+
+.bookmarks-panel summary::-webkit-details-marker { display: none; }
+
+.bookmarks-panel summary::before {
+    content: "▸";
+    display: inline-block;
+    width: 14px;
+    color: var(--muted);
+    transition: transform 0.15s ease;
+}
+
+.bookmarks-panel[open] summary::before { transform: rotate(90deg); }
+
+.count {
+    color: var(--muted);
+    font-weight: 400;
+    margin-left: 4px;
+}
+
+.bookmarks-list {
+    list-style: none;
+    padding: 6px 0 0;
+    margin: 0;
+}
+
+.bookmarks-list li {
+    padding: 4px 0;
+    font-size: 0.85rem;
+}
+
+.bookmarks-list a {
+    color: var(--accent);
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.bookmarks-list a:hover { text-decoration: underline; }
+
+.bookmarks-list .empty {
+    color: var(--muted);
+    font-style: italic;
+    font-size: 0.8rem;
+}
+
+.book-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.book-list li {
+    padding: 10px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background 0.1s ease;
+}
+
+.book-list li:hover { background: var(--accent-soft); }
+
+.book-list li.active {
+    background: var(--accent-soft);
+    color: var(--accent);
+    font-weight: 600;
+}
+
+/* Reader pane ------------------------------------------------------------- */
+.reader-pane {
+    padding: 28px clamp(16px, 5vw, 56px) 96px;
+    max-width: 880px;
+    margin: 0 auto;
+}
+
+.book-header {
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+}
+
+#book-title {
+    margin: 0 0 4px;
+    font-size: 1.6rem;
+}
+
+.book-meta {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.9rem;
+}
+
+.pager {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    padding: 8px 12px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+}
+
+.pager button {
+    padding: 6px 14px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    color: var(--fg);
+}
+
+.pager button:hover:not(:disabled) {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+.pager button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+#page-info {
+    color: var(--muted);
+    font-size: 0.9rem;
+    font-variant-numeric: tabular-nums;
+}
+
+.error {
+    background: #fdecec;
+    color: #a33;
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+}
+
+.loading {
+    color: var(--muted);
+    font-size: 0.9rem;
+    text-align: center;
+    padding: 24px;
+}
+
+.hadith-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.hadith {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px 22px;
+}
+
+.hadith.highlight {
+    background: var(--accent-soft);
+    border-color: var(--accent);
+}
+
+.hadith-num {
+    display: inline-block;
+    color: var(--accent);
+    font-weight: 700;
+    font-size: 0.85rem;
+    margin-bottom: 8px;
+}
+
+.hadith-arab {
+    font-family: "Amiri Quran", "Scheherazade New", "Traditional Arabic", serif;
+    font-size: 1.45rem;
+    line-height: 2.2;
+    direction: rtl;
+    text-align: justify;
+    color: var(--fg);
+    margin: 0 0 10px;
+}
+
+.hadith-id {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: var(--fg);
+    margin: 0;
+}
+
+.hadith-actions {
+    display: flex;
+    gap: 6px;
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px dashed var(--border);
+}
+
+.hadith-actions button {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 0.78rem;
+    cursor: pointer;
+}
+
+.hadith-actions button:hover {
+    color: var(--fg);
+    border-color: var(--accent);
+}
+
+.hadith-actions button.active {
+    color: var(--accent);
+    border-color: var(--accent);
+    background: var(--accent-soft);
+    font-weight: 600;
+}

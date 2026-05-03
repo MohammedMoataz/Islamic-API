@@ -1,4 +1,4 @@
-import { getSettings, setSettings, DEFAULT_SETTINGS, TAFSIR_EDITIONS } from "../scripts/settings.js";
+import { getSettings, setSettings, DEFAULT_SETTINGS, TAFSIR_EDITIONS, HADITH_BOOKS } from "../scripts/settings.js";
 import { COUNTRIES, citiesFor } from "../scripts/locations.js";
 import { fetchReciters } from "../scripts/quran-audio.js";
 
@@ -11,6 +11,7 @@ const els = {
     tafsirSlug: document.getElementById("tafsir-slug"),
     tafsirDefault: document.getElementById("tafsir-default"),
     reciter: document.getElementById("reciter"),
+    hadithBook: document.getElementById("hadith-book"),
     saveBtn: document.getElementById("save-btn"),
     testBtn: document.getElementById("test-notif"),
     status: document.getElementById("status")
@@ -21,6 +22,7 @@ let pristine = null;       // snapshot of saved values, used to detect dirtiness
 (async function load() {
     populateCountries();
     populateTafsirEditions();
+    populateHadithBooks();
     const s = await getSettings();
     applyToForm(s);
 
@@ -46,6 +48,12 @@ function populateCountries() {
 function populateTafsirEditions() {
     els.tafsirSlug.innerHTML = TAFSIR_EDITIONS
         .map((t) => `<option value="${escapeHtml(t.slug)}">${escapeHtml(t.language)} — ${escapeHtml(t.title)}</option>`)
+        .join("");
+}
+
+function populateHadithBooks() {
+    els.hadithBook.innerHTML = HADITH_BOOKS
+        .map((b) => `<option value="${escapeHtml(b.slug)}">${escapeHtml(b.name)}</option>`)
         .join("");
 }
 
@@ -84,6 +92,10 @@ function applyToForm(s) {
         : DEFAULT_SETTINGS.quran.tafsirSlug;
     els.tafsirSlug.value = knownSlug;
     els.tafsirDefault.checked = s.quran.showTafsirByDefault;
+    const knownBook = HADITH_BOOKS.some((b) => b.slug === s.hadith.defaultBook)
+        ? s.hadith.defaultBook
+        : DEFAULT_SETTINGS.hadith.defaultBook;
+    els.hadithBook.value = knownBook;
 }
 
 function snapshotForm() {
@@ -95,7 +107,8 @@ function snapshotForm() {
         notifPre: els.notifPre.value,
         tafsirSlug: els.tafsirSlug.value,
         tafsirDefault: els.tafsirDefault.checked,
-        reciter: els.reciter.value
+        reciter: els.reciter.value,
+        hadithBook: els.hadithBook.value
     });
 }
 
@@ -139,6 +152,9 @@ async function save() {
         },
         audio: {
             reciterId: parseInt(els.reciter.value, 10) || DEFAULT_SETTINGS.audio.reciterId
+        },
+        hadith: {
+            defaultBook: els.hadithBook.value || DEFAULT_SETTINGS.hadith.defaultBook
         }
     });
     pristine = snapshotForm();
@@ -171,7 +187,7 @@ els.country.addEventListener("change", () => {
 });
 
 // Any other change just toggles dirty UI.
-[els.city, els.method, els.notifEnabled, els.notifPre, els.tafsirSlug, els.tafsirDefault, els.reciter].forEach((el) => {
+[els.city, els.method, els.notifEnabled, els.notifPre, els.tafsirSlug, els.tafsirDefault, els.reciter, els.hadithBook].forEach((el) => {
     el.addEventListener("change", updateDirtyUI);
     el.addEventListener("input", updateDirtyUI);
 });

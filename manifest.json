@@ -1,8 +1,8 @@
 {
     "manifest_version": 3,
     "name": "Prayer Times Table",
-    "version": "1.4.0",
-    "description": "Prayer times with reliable notifications, configurable city, a Qur'an reader, and recitation playback.",
+    "version": "1.5.0",
+    "description": "Prayer times, configurable city, Qur'an reader with recitation, and a hadith browser.",
     "icons": {
         "16": "images/icon-16.png",
         "48": "images/icon-48.png",
@@ -19,7 +19,8 @@
         "https://api.aladhan.com/*",
         "https://api.alquran.cloud/*",
         "https://quranenc.com/*",
-        "https://api.quran.com/*"
+        "https://api.quran.com/*",
+        "https://api.hadith.gading.dev/*"
     ],
     "background": {
         "service_worker": "background.js",
