@@ -97,10 +97,20 @@ header h1 {
     font-size: 0.95rem;
 }
 
-#prayer-table thead th {
-    text-align: left;
+#prayer-table th,
+#prayer-table td {
     padding: 10px 14px;
-    background: #f1f3f5;
+    text-align: start;
+}
+
+#prayer-table th:last-child,
+#prayer-table td:last-child {
+    text-align: end;
+    font-variant-numeric: tabular-nums;
+}
+
+#prayer-table thead th {
+    background: var(--bg);
     color: var(--muted);
     font-weight: 600;
     font-size: 0.72rem;
@@ -110,7 +120,6 @@ header h1 {
 }
 
 #prayer-table tbody td {
-    padding: 10px 14px;
     border-bottom: 1px solid var(--border);
 }
 
@@ -130,11 +139,6 @@ header h1 {
 
 #prayer-table tbody tr.next td:first-child {
     box-shadow: inset 3px 0 0 0 var(--accent);
-}
-
-#prayer-table tbody tr td:last-child {
-    text-align: right;
-    font-variant-numeric: tabular-nums;
 }
 
 .qibla-card {
@@ -169,7 +173,7 @@ header h1 {
 }
 
 .compass-ring {
-    fill: #fff;
+    fill: var(--card);
     stroke: var(--border);
     stroke-width: 1.5;
 }

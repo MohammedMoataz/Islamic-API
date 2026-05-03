@@ -35,7 +35,27 @@ audio.addEventListener("timeupdate", () => setState({
     duration: safeDuration()
 }));
 audio.addEventListener("durationchange", () => setState({ duration: safeDuration() }));
-audio.addEventListener("error", () => setState({ playing: false, loading: false }));
+audio.addEventListener("error", () => {
+    const e = audio.error;
+    const codes = { 1: "ABORTED", 2: "NETWORK", 3: "DECODE", 4: "SRC_NOT_SUPPORTED" };
+    console.error(
+        `audio <error>: code=${e?.code} (${codes[e?.code] || "UNKNOWN"}) ` +
+        `message="${e?.message ?? ""}" src="${audio.currentSrc}"`
+    );
+    // A stream that fails to load should reset the UI to "idle" so the user
+    // can pick another station / surah without getting stuck on the broken one.
+    setState({
+        playing: false, loading: false,
+        surah: null, reciter: null, station: null,
+        title: "", currentTime: 0, duration: 0
+    });
+});
+
+function logPlayError(err, hint) {
+    const name = err?.name ?? "Error";
+    const msg = err?.message ?? String(err);
+    console.error(`audio.play() rejected: ${name} — ${msg}${hint ? ` (${hint})` : ""}`);
+}
 
 chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
     if (msg?.target !== "offscreen") return;
@@ -47,8 +67,12 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
                 audio.src = msg.url;
             }
             audio.play().catch((err) => {
-                console.error("audio.play() rejected:", err);
-                setState({ loading: false, playing: false });
+                logPlayError(err);
+                setState({
+                    playing: false, loading: false,
+                    surah: null, reciter: null, station: null,
+                    title: "", currentTime: 0, duration: 0
+                });
             });
             // Switching to a surah clears any radio attribution.
             setState({
@@ -66,8 +90,15 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
                 audio.src = msg.url;
             }
             audio.play().catch((err) => {
-                console.error("audio.play() rejected:", err);
-                setState({ loading: false, playing: false });
+                const httpHint = msg.url?.startsWith("http://")
+                    ? "stream is plain HTTP — Chrome blocks mixed content from extensions"
+                    : null;
+                logPlayError(err, httpHint);
+                setState({
+                    playing: false, loading: false,
+                    surah: null, reciter: null, station: null,
+                    title: "", currentTime: 0, duration: 0
+                });
             });
             // Radio replaces any active surah session.
             setState({

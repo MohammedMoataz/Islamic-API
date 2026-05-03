@@ -18,10 +18,15 @@ export async function playSurah(reciterId, surah, title) {
 
 export async function playRadio(url, station) {
     await ensureOffscreen();
+    // Chrome MV3 extensions are HTTPS contexts and refuse to load HTTP audio
+    // (mixed content). Most servers serve the same stream over both, so try
+    // upgrading; the audio element's "error" event will fire if HTTPS isn't
+    // available, and the radio page surfaces it.
+    const safeUrl = url.startsWith("http://") ? url.replace(/^http:/i, "https:") : url;
     return chrome.runtime.sendMessage({
         target: "offscreen",
         action: "play-radio",
-        url, station, title: station
+        url: safeUrl, station, title: station
     });
 }
 

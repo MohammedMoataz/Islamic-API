@@ -1,6 +1,10 @@
 import { getSettings, setSettings, DEFAULT_SETTINGS, TAFSIR_EDITIONS, HADITH_BOOKS } from "../scripts/settings.js";
 import { COUNTRIES, citiesFor } from "../scripts/locations.js";
 import { fetchReciters } from "../scripts/quran-audio.js";
+import { bootstrapI18n, t } from "../scripts/i18n.js";
+import { bootstrapTheme } from "../scripts/theme.js";
+
+await Promise.all([bootstrapTheme(), bootstrapI18n()]);
 
 const els = {
     country: document.getElementById("country"),
@@ -14,6 +18,8 @@ const els = {
     hadithBook: document.getElementById("hadith-book"),
     azkarReminders: document.getElementById("azkar-reminders"),
     azkarInterval: document.getElementById("azkar-interval"),
+    language: document.getElementById("language"),
+    theme: document.getElementById("theme"),
     saveBtn: document.getElementById("save-btn"),
     testBtn: document.getElementById("test-notif"),
     status: document.getElementById("status")
@@ -103,6 +109,8 @@ function applyToForm(s) {
     if ([...els.azkarInterval.options].some((o) => o.value === knownInterval)) {
         els.azkarInterval.value = knownInterval;
     }
+    els.language.value = s.language === "ar" ? "ar" : "en";
+    els.theme.value = ["auto", "light", "dark"].includes(s.theme) ? s.theme : "auto";
 }
 
 function snapshotForm() {
@@ -117,7 +125,9 @@ function snapshotForm() {
         reciter: els.reciter.value,
         hadithBook: els.hadithBook.value,
         azkarReminders: els.azkarReminders.checked,
-        azkarInterval: els.azkarInterval.value
+        azkarInterval: els.azkarInterval.value,
+        language: els.language.value,
+        theme: els.theme.value
     });
 }
 
@@ -128,7 +138,7 @@ function isDirty() {
 function updateDirtyUI() {
     const dirty = isDirty();
     els.saveBtn.disabled = !dirty;
-    els.status.textContent = dirty ? "Unsaved changes" : "";
+    els.status.textContent = dirty ? t("options.unsaved") : "";
     els.status.classList.toggle("muted", dirty);
     els.status.classList.toggle("success", false);
 }
@@ -174,7 +184,9 @@ async function save() {
                     DEFAULT_SETTINGS.azkar.reminders.avgIntervalMinutes
                 )
             }
-        }
+        },
+        language: els.language.value === "ar" ? "ar" : "en",
+        theme: ["auto", "light", "dark"].includes(els.theme.value) ? els.theme.value : "auto"
     });
     pristine = snapshotForm();
     els.saveBtn.disabled = true;
@@ -184,9 +196,10 @@ async function save() {
 function flashSaved() {
     els.status.classList.remove("muted");
     els.status.classList.add("success");
-    els.status.textContent = "Saved ✓";
+    const msg = t("options.saved");
+    els.status.textContent = msg;
     setTimeout(() => {
-        if (els.status.textContent === "Saved ✓") {
+        if (els.status.textContent === msg) {
             els.status.textContent = "";
             els.status.classList.remove("success");
         }
@@ -206,7 +219,7 @@ els.country.addEventListener("change", () => {
 });
 
 // Any other change just toggles dirty UI.
-[els.city, els.method, els.notifEnabled, els.notifPre, els.tafsirSlug, els.tafsirDefault, els.reciter, els.hadithBook, els.azkarReminders, els.azkarInterval].forEach((el) => {
+[els.city, els.method, els.notifEnabled, els.notifPre, els.tafsirSlug, els.tafsirDefault, els.reciter, els.hadithBook, els.azkarReminders, els.azkarInterval, els.language, els.theme].forEach((el) => {
     el.addEventListener("change", updateDirtyUI);
     el.addEventListener("input", updateDirtyUI);
 });
@@ -217,9 +230,10 @@ els.testBtn.addEventListener("click", async () => {
     await chrome.runtime.sendMessage({ type: "test-notification" });
     els.status.classList.remove("muted");
     els.status.classList.add("success");
-    els.status.textContent = "Test notification sent.";
+    const msg = t("options.testSent");
+    els.status.textContent = msg;
     setTimeout(() => {
-        if (els.status.textContent === "Test notification sent.") {
+        if (els.status.textContent === msg) {
             els.status.textContent = "";
             els.status.classList.remove("success");
         }

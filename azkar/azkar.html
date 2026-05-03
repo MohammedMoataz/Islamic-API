@@ -1,15 +1,16 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Azkar</title>
+    <link rel="stylesheet" href="../styles/theme.css">
     <link rel="stylesheet" href="azkar.css">
 </head>
 <body>
     <header class="topbar">
-        <h1 class="brand">Azkar</h1>
-        <a href="#" id="open-options" class="topbar-link">Settings</a>
+        <h1 class="brand" data-i18n="azkar.title">Azkar</h1>
+        <a href="#" id="open-options" class="topbar-link" data-i18n="popup.settings">Settings</a>
     </header>
 
     <main class="layout">
@@ -21,11 +22,11 @@
             <header id="cat-header" class="cat-header" hidden>
                 <h2 id="cat-title"></h2>
                 <p id="cat-meta" class="cat-meta"></p>
-                <button id="reset-all" class="btn-reset-all" type="button">↻ Reset all</button>
+                <button id="reset-all" class="btn-reset-all" type="button" data-i18n="azkar.resetAll">↻ Reset all</button>
             </header>
 
             <p id="azkar-error" class="error" hidden></p>
-            <p id="azkar-loading" class="loading">Loading…</p>
+            <p id="azkar-loading" class="loading" data-i18n="reader.loading">Loading…</p>
 
             <ol id="azkar-list" class="azkar-list" aria-label="Azkar"></ol>
         </section>

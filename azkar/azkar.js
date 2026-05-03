@@ -2,6 +2,10 @@ import {
     fetchAzkar, getCounts, setCount, resetCount, resetCategory,
     clearNotifiedKind, countKey
 } from "../scripts/azkar.js";
+import { bootstrapI18n, t } from "../scripts/i18n.js";
+import { bootstrapTheme } from "../scripts/theme.js";
+
+await Promise.all([bootstrapTheme(), bootstrapI18n()]);
 
 const els = {
     categoryList: document.getElementById("category-list"),
@@ -38,7 +42,7 @@ const state = {
         console.error(err);
         els.loading.hidden = true;
         els.error.hidden = false;
-        els.error.textContent = "Failed to load azkar. Check your connection.";
+        els.error.textContent = t("azkar.errorLoad");
     }
 })();
 
@@ -70,7 +74,7 @@ function openCategory(idx) {
     els.error.hidden = true;
     els.catHeader.hidden = false;
     els.catTitle.textContent = group.category;
-    els.catMeta.textContent = `${group.items.length} supplications`;
+    els.catMeta.textContent = `${group.items.length} ${t("azkar.supplications")}`;
     history.replaceState(null, "", `#${idx}`);
 
     renderDhikrs(group);
@@ -102,10 +106,10 @@ function buildDhikrCard(category, index, item) {
         ${referenceLine ? `<p class="dhikr-meta">${escapeHtml(referenceLine)}</p>` : ""}
         <div class="dhikr-controls">
             <button class="tasbih${done ? " done" : ""}" type="button"
-                    aria-label="Tap to count">${done ? "✓" : remaining}</button>
+                    aria-label="${escapeHtml(t("azkar.tapHint"))}">${done ? "✓" : remaining}</button>
             <div class="tasbih-info">
-                <span class="tasbih-target">Target: ${item.count}</span>
-                <span class="tasbih-hint">${done ? "Completed" : "Tap to count"}</span>
+                <span class="tasbih-target">${escapeHtml(t("azkar.target"))}: ${item.count}</span>
+                <span class="tasbih-hint">${escapeHtml(done ? t("azkar.completed") : t("azkar.tapHint"))}</span>
             </div>
             <button class="btn-reset" type="button" aria-label="Reset" title="Reset">↻</button>
         </div>
@@ -149,7 +153,7 @@ function updateRow(rowEl, item, remaining) {
     const tasbih = rowEl.querySelector(".tasbih");
     tasbih.classList.toggle("done", done);
     tasbih.textContent = done ? "✓" : String(remaining);
-    rowEl.querySelector(".tasbih-hint").textContent = done ? "Completed" : "Tap to count";
+    rowEl.querySelector(".tasbih-hint").textContent = done ? t("azkar.completed") : t("azkar.tapHint");
 }
 
 function autoAdvanceFrom(rowEl) {

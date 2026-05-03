@@ -11,6 +11,10 @@ import {
     pauseAudio, resumeAudio, stopAudio, getAudioState, onAudioState
 } from "../scripts/audio-controller.js";
 import { dailyHadith, bookTitle } from "../scripts/hadith.js";
+import { bootstrapI18n, t } from "../scripts/i18n.js";
+import { bootstrapTheme } from "../scripts/theme.js";
+
+await Promise.all([bootstrapTheme(), bootstrapI18n()]);
 
 const els = {
     tableBody: document.getElementById("prayer-times"),
@@ -63,7 +67,7 @@ let countdownTimer = null;
     } catch (err) {
         console.error(err);
         els.error.hidden = false;
-        els.error.textContent = "Failed to load prayer times. Check your connection or settings.";
+        els.error.textContent = t("popup.error");
     }
 })();
 
@@ -71,7 +75,7 @@ async function renderDailyHadith(book) {
     const { hadith, number } = await dailyHadith(book);
     if (!hadith) return;
     els.hadithCard.hidden = false;
-    els.hadithCardMeta.textContent = `${bookTitle(book)} #${hadith.number || number}`;
+    els.hadithCardMeta.textContent = `${t(`hadith.book.${book}`, bookTitle(book))} #${hadith.number || number}`;
     els.hadithCardArab.textContent = hadith.arab || "";
     els.hadithCardId.textContent = hadith.id || "";
     els.hadithCard.onclick = () => {
@@ -93,7 +97,7 @@ function renderTable(timings) {
         const row = document.createElement("tr");
         if (at < now) row.classList.add("past");
         if (next && name === next.name) row.classList.add("next");
-        row.innerHTML = `<td>${name}</td><td>${cleanTime(hhmm)}</td>`;
+        row.innerHTML = `<td>${t(`prayer.${name}`, name)}</td><td>${cleanTime(hhmm)}</td>`;
         els.tableBody.appendChild(row);
     }
 }
@@ -111,7 +115,7 @@ function startCountdown(timings) {
             return;
         }
         els.countdown.hidden = false;
-        els.countdownName.textContent = next.name;
+        els.countdownName.textContent = t(`prayer.${next.name}`, next.name);
         els.countdownValue.textContent = formatCountdown(next.at - Date.now());
     };
     tick();
@@ -180,7 +184,7 @@ function setupDragRotation() {
         compassEl.classList.add("dragging");
         if (qiblaState.mode === "idle") {
             qiblaState.mode = "manual";
-            setQiblaStatus("Manual — drag to align");
+            setQiblaStatus(t("qibla.manual"));
         }
         e.preventDefault();
     });
@@ -205,16 +209,15 @@ function setupDragRotation() {
 
 function setupLiveCompass(qiblaBearing) {
     if (typeof DeviceOrientationEvent === "undefined") {
-        setQiblaStatus("Drag to align");
+        setQiblaStatus(t("qibla.dragHint"));
         return;
     }
 
-    // iOS 13+ requires explicit permission from a user gesture.
     const needsPermission = typeof DeviceOrientationEvent.requestPermission === "function";
 
     if (needsPermission) {
         els.qiblaCalibrate.hidden = false;
-        setQiblaStatus("Tap to enable live compass");
+        setQiblaStatus(t("qibla.tapEnable"));
         els.qiblaCalibrate.addEventListener("click", async () => {
             try {
                 const result = await DeviceOrientationEvent.requestPermission();
@@ -222,22 +225,21 @@ function setupLiveCompass(qiblaBearing) {
                     els.qiblaCalibrate.hidden = true;
                     attachOrientation();
                 } else {
-                    setQiblaStatus("Permission denied — drag to align");
+                    setQiblaStatus(t("qibla.permDenied"));
                 }
             } catch (err) {
                 console.error(err);
-                setQiblaStatus("Permission failed — drag to align");
+                setQiblaStatus(t("qibla.permDenied"));
             }
         }, { once: true });
     } else {
-        // Android / desktop: try silently. If sensors absent, drag fallback stays.
         attachOrientation();
     }
 }
 
 function attachOrientation() {
     let receivedEvent = false;
-    setQiblaStatus("Calibrating…");
+    setQiblaStatus(t("qibla.calibrating"));
 
     const handler = (event) => {
         const heading = compassHeadingFromEvent(event);
@@ -245,9 +247,9 @@ function attachOrientation() {
         if (!receivedEvent) {
             receivedEvent = true;
             qiblaState.mode = "live";
-            qiblaState.manualOffset = 0; // sensor takes over
+            qiblaState.manualOffset = 0;
             document.querySelector(".compass").classList.remove("draggable");
-            setQiblaStatus("Live");
+            setQiblaStatus(t("qibla.live"));
         }
         qiblaState.heading = heading;
         redrawCompass();
@@ -259,7 +261,7 @@ function attachOrientation() {
     window.addEventListener(eventName, handler);
 
     setTimeout(() => {
-        if (!receivedEvent) setQiblaStatus("Drag to align (no sensor)");
+        if (!receivedEvent) setQiblaStatus(t("qibla.noSensor"));
     }, 3000);
 }
 

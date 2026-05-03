@@ -8,6 +8,10 @@ import {
     playSurah, pauseAudio, resumeAudio, stopAudio, seekAudio,
     getAudioState, onAudioState
 } from "../scripts/audio-controller.js";
+import { bootstrapI18n, t } from "../scripts/i18n.js";
+import { bootstrapTheme } from "../scripts/theme.js";
+
+await Promise.all([bootstrapTheme(), bootstrapI18n()]);
 
 const els = {
     list: document.getElementById("surah-list"),

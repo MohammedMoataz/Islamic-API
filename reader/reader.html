@@ -1,26 +1,27 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Qur'an</title>
+    <link rel="stylesheet" href="../styles/theme.css">
     <link rel="stylesheet" href="reader.css">
 </head>
 <body>
     <header class="topbar">
-        <h1 class="brand">Qur'an</h1>
-        <a href="#" id="open-options" class="topbar-link">Settings</a>
+        <h1 class="brand" data-i18n="reader.title">Qur'an</h1>
+        <a href="#" id="open-options" class="topbar-link" data-i18n="popup.settings">Settings</a>
     </header>
 
     <main class="layout">
         <aside class="sidebar">
             <details class="bookmarks-panel" open>
-                <summary>Bookmarks <span id="bookmarks-count" class="count"></span></summary>
+                <summary><span data-i18n="reader.bookmarks">Bookmarks</span> <span id="bookmarks-count" class="count"></span></summary>
                 <ul id="bookmarks-list" class="bookmarks-list"></ul>
             </details>
 
             <div class="search-row">
-                <input id="surah-search" type="search" placeholder="Search surah…" autocomplete="off" aria-label="Search surahs">
+                <input id="surah-search" type="search" data-i18n="reader.searchSurah" placeholder="Search surah…" autocomplete="off" aria-label="Search surahs">
             </div>
 
             <ul id="surah-list" class="surah-list" aria-label="List of surahs"></ul>
@@ -29,7 +30,7 @@
         <section class="reader-pane" id="reader-pane">
             <div id="resume-banner" class="resume-banner" hidden>
                 <span id="resume-text"></span>
-                <button id="resume-go" type="button">Go</button>
+                <button id="resume-go" type="button" data-i18n="reader.resumeGo">Go</button>
                 <button id="resume-dismiss" type="button" aria-label="Dismiss" class="icon-btn">✕</button>
             </div>
 
@@ -37,11 +38,11 @@
                 <div class="basmala" id="basmala">﷽</div>
                 <h2 class="surah-name-ar" id="surah-name-ar"></h2>
                 <p class="surah-meta" id="surah-meta"></p>
-                <button id="play-surah" type="button" class="btn-listen">▶ Listen</button>
+                <button id="play-surah" type="button" class="btn-listen" data-i18n="reader.btnListen">▶ Listen</button>
             </header>
 
             <p id="reader-error" class="error" hidden></p>
-            <p id="reader-loading" class="loading">Loading…</p>
+            <p id="reader-loading" class="loading" data-i18n="reader.loading">Loading…</p>
 
             <ol id="ayat" class="ayat" aria-label="Ayat"></ol>
         </section>

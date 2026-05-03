@@ -2,6 +2,10 @@ import { fetchStations } from "../scripts/radio.js";
 import {
     playRadio, stopAudio, getAudioState, onAudioState
 } from "../scripts/audio-controller.js";
+import { bootstrapI18n, t } from "../scripts/i18n.js";
+import { bootstrapTheme } from "../scripts/theme.js";
+
+await Promise.all([bootstrapTheme(), bootstrapI18n()]);
 
 const LAST_RADIO_KEY = "lastRadio";
 
@@ -38,7 +42,7 @@ const state = {
         console.error(err);
         els.loading.hidden = true;
         els.error.hidden = false;
-        els.error.textContent = "Failed to load station list. Check your connection.";
+        els.error.textContent = t("radio.errorLoad");
     }
 })();
 
@@ -58,14 +62,14 @@ function renderStations() {
 
         const isLast = state.lastPlayed?.name === s.name;
         const lastBadge = isLast && !playing
-            ? `<span class="last-played-badge">Last played</span>`
+            ? `<span class="last-played-badge">${escapeHtml(t("radio.lastPlayed"))}</span>`
             : "";
 
         li.innerHTML = `
             <button class="play-btn" type="button" aria-label="Play / stop">${playing ? "⏸" : "▶"}</button>
             <div class="station-info">
                 <div class="station-name">${escapeHtml(s.name)}</div>
-                <div class="station-status">${playing ? "Playing" : "Idle"}</div>
+                <div class="station-status">${escapeHtml(playing ? t("radio.statusPlaying") : t("radio.statusIdle"))}</div>
             </div>
             ${lastBadge}
         `;
@@ -104,10 +108,12 @@ function applyAudioState(s) {
         if (!btn || !status) continue;
         if (isThis) {
             btn.textContent = s.playing ? "⏸" : (s.loading ? "…" : "▶");
-            status.textContent = s.loading ? "Loading…" : (s.playing ? "Playing" : "Paused");
+            status.textContent = s.loading
+                ? t("radio.statusLoading")
+                : (s.playing ? t("radio.statusPlaying") : t("radio.statusPaused"));
         } else {
             btn.textContent = "▶";
-            status.textContent = "Idle";
+            status.textContent = t("radio.statusIdle");
         }
     }
 }

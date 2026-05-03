@@ -1,21 +1,22 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hadith</title>
+    <link rel="stylesheet" href="../styles/theme.css">
     <link rel="stylesheet" href="hadith.css">
 </head>
 <body>
     <header class="topbar">
-        <h1 class="brand">Hadith</h1>
-        <a href="#" id="open-options" class="topbar-link">Settings</a>
+        <h1 class="brand" data-i18n="hadith.title">Hadith</h1>
+        <a href="#" id="open-options" class="topbar-link" data-i18n="popup.settings">Settings</a>
     </header>
 
     <main class="layout">
         <aside class="sidebar">
             <details class="bookmarks-panel" open>
-                <summary>Bookmarks <span id="bookmarks-count" class="count"></span></summary>
+                <summary><span data-i18n="reader.bookmarks">Bookmarks</span> <span id="bookmarks-count" class="count"></span></summary>
                 <ul id="bookmarks-list" class="bookmarks-list"></ul>
             </details>
 
@@ -29,13 +30,13 @@
             </header>
 
             <nav id="pager" class="pager" hidden>
-                <button id="page-prev" type="button">‹ Prev</button>
+                <button id="page-prev" type="button" data-i18n="hadith.pagePrev">‹ Prev</button>
                 <span id="page-info"></span>
-                <button id="page-next" type="button">Next ›</button>
+                <button id="page-next" type="button" data-i18n="hadith.pageNext">Next ›</button>
             </nav>
 
             <p id="hadith-error" class="error" hidden></p>
-            <p id="hadith-loading" class="loading">Loading…</p>
+            <p id="hadith-loading" class="loading" data-i18n="reader.loading">Loading…</p>
 
             <ol id="hadiths" class="hadith-list" aria-label="Hadiths"></ol>
         </section>

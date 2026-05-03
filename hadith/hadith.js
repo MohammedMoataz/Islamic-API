@@ -6,6 +6,10 @@ import { HADITH_BOOKS, getSettings } from "../scripts/settings.js";
 import {
     getBookmarks, isBookmarked, toggleBookmark
 } from "../scripts/hadith-bookmarks.js";
+import { bootstrapI18n, t } from "../scripts/i18n.js";
+import { bootstrapTheme } from "../scripts/theme.js";
+
+await Promise.all([bootstrapTheme(), bootstrapI18n()]);
 
 const NETWORK_PAGE_SIZE = 300;
 
@@ -54,12 +58,16 @@ const state = {
 
 // --------------------------------------------------------------- Sidebar
 
+function localBookName(slug) {
+    return t(`hadith.book.${slug}`, bookTitle(slug));
+}
+
 function renderBookList() {
     els.bookList.innerHTML = "";
     for (const b of HADITH_BOOKS) {
         const li = document.createElement("li");
         li.dataset.slug = b.slug;
-        li.textContent = b.name;
+        li.textContent = localBookName(b.slug);
         li.addEventListener("click", () => openBook(b.slug, 1));
         els.bookList.appendChild(li);
     }
@@ -73,14 +81,14 @@ function renderBookmarks() {
     if (state.bookmarks.length === 0) {
         const li = document.createElement("li");
         li.className = "empty";
-        li.textContent = "No bookmarks yet — tap 🔖 on any hadith.";
+        li.textContent = t("hadith.bookmarksEmpty");
         els.bookmarksList.appendChild(li);
         return;
     }
     for (const b of state.bookmarks) {
         const li = document.createElement("li");
         const a = document.createElement("a");
-        a.textContent = `${bookTitle(b.book)} #${b.number}`;
+        a.textContent = `${localBookName(b.book)} #${b.number}`;
         a.addEventListener("click", async (e) => {
             e.preventDefault();
             const uiPage = Math.ceil(b.number / UI_PAGE_SIZE);
@@ -133,7 +141,7 @@ async function openBook(slug, uiPage = 1) {
     } catch (err) {
         console.error(err);
         els.error.hidden = false;
-        els.error.textContent = `Failed to load ${bookTitle(slug)}. Check your connection.`;
+        els.error.textContent = `${t("hadith.errorLoad")} (${localBookName(slug)})`;
     } finally {
         els.loading.hidden = true;
     }
@@ -141,13 +149,13 @@ async function openBook(slug, uiPage = 1) {
 
 function renderHeader(slug, total, uiPage, totalUiPages) {
     els.bookHeader.hidden = false;
-    els.bookTitleEl.textContent = bookTitle(slug);
+    els.bookTitleEl.textContent = localBookName(slug);
     const startNumber = (uiPage - 1) * UI_PAGE_SIZE + 1;
     const endNumber = Math.min(uiPage * UI_PAGE_SIZE, total);
     els.bookMeta.textContent =
-        `${total.toLocaleString()} hadiths · showing #${startNumber}–${endNumber}`;
+        `${total.toLocaleString()} ${t("hadith.hadithsTotal")} · ${t("hadith.showing")} #${startNumber}–${endNumber}`;
     els.pager.hidden = false;
-    els.pageInfo.textContent = `Page ${uiPage} of ${totalUiPages}`;
+    els.pageInfo.textContent = `${t("hadith.pageOf")} ${uiPage} ${t("hadith.of")} ${totalUiPages}`;
 }
 
 function renderHadiths(list) {

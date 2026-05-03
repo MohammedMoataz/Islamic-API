@@ -97,14 +97,68 @@ function normaliseItem(raw) {
 function pickString(obj, keys) {
     for (const k of keys) {
         const v = obj[k];
-        if (typeof v === "string" && v.trim()) return v;
+        if (typeof v === "string" && v.trim()) return cleanText(v);
+        if (Array.isArray(v) && v.length) {
+            return cleanText(v.map((x) => String(x)).join(" "));
+        }
         if (v && typeof v === "object") {
             // Some sources nest by language: { ar: "...", en: "..." }
-            if (typeof v.ar === "string" && v.ar.trim()) return v.ar;
-            if (typeof v.text === "string" && v.text.trim()) return v.text;
+            if (typeof v.ar === "string" && v.ar.trim()) return cleanText(v.ar);
+            if (typeof v.text === "string" && v.text.trim()) return cleanText(v.text);
         }
     }
     return "";
+}
+
+// Normalises arbitrarily-mangled upstream text into one clean paragraph.
+//
+// Handles the common upstream pathologies:
+//   - Real newlines / tabs / carriage returns → single space.
+//   - Literal "\n", "\r", "\t" escape sequences (where the serialiser left
+//     the backslash + letter as two separate characters) → single space.
+//   - Python-list-as-string artifacts: ['\n', '"actual text". [ref]\n', '\n']
+//     → strip the brackets, pull out each single-quoted item, discard the
+//       items that are pure whitespace / "\n" markers, join the rest.
+//   - Stray leading / trailing quotes left over from the list serialisation.
+function cleanText(s) {
+    let str = String(s);
+
+    // 1) Drop outer Python-list brackets if present.
+    const trimmed = str.trim();
+    if (trimmed.startsWith("[") && trimmed.endsWith("]")) {
+        str = trimmed.slice(1, -1);
+    }
+
+    // 2) If the value still looks like a Python-list serialisation (single-
+    //    quoted items separated by commas), extract each item and drop the
+    //    junk ones.
+    if (/'\s*,\s*'/.test(str)) {
+        const items = [...str.matchAll(/'((?:\\'|[^'])*)'/g)].map((m) => m[1]);
+        if (items.length) {
+            const cleaned = items
+                .map((it) => it
+                    .replace(/\\n/g, " ")
+                    .replace(/\\r/g, " ")
+                    .replace(/\\t/g, " ")
+                    .replace(/\\"/g, '"')
+                    .replace(/[\r\n\t]+/g, " ")
+                    .trim()
+                )
+                .filter((it) => it.length > 0);
+            str = cleaned.join(" ");
+        }
+    }
+
+    // 3) Final cleanup pass for anything that didn't go through the list path.
+    return str
+        .replace(/\\n/g, " ")
+        .replace(/\\r/g, " ")
+        .replace(/\\t/g, " ")
+        .replace(/\\"/g, '"')
+        .replace(/[\r\n\t]+/g, " ")
+        .replace(/\s+/g, " ")
+        .replace(/^[\s'"]+|[\s'"]+$/g, "")
+        .trim();
 }
 
 function parseCount(raw) {

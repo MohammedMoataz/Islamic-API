@@ -1,21 +1,22 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Prayer Times</title>
+    <link rel="stylesheet" href="../styles/theme.css">
     <link rel="stylesheet" href="popup.css">
 </head>
 <body>
     <main id="container">
         <header>
-            <h1 id="city-line">Prayer Times</h1>
+            <h1 id="city-line" data-i18n="popup.cityFallback">Prayer Times</h1>
             <p id="hijri-line"></p>
         </header>
 
         <div id="countdown" class="countdown" hidden>
             <span id="countdown-name"></span>
-            <span class="countdown-sep">in</span>
+            <span class="countdown-sep" data-i18n="popup.in">in</span>
             <span id="countdown-value" class="countdown-value"></span>
         </div>
 
@@ -24,8 +25,8 @@
         <table id="prayer-table">
             <thead>
                 <tr>
-                    <th>Prayer</th>
-                    <th>Time</th>
+                    <th data-i18n="popup.headerPrayer">Prayer</th>
+                    <th data-i18n="popup.headerTime">Time</th>
                 </tr>
             </thead>
             <tbody id="prayer-times"></tbody>
@@ -45,16 +46,16 @@
                 <circle class="compass-pin" cx="50" cy="50" r="3" />
             </svg>
             <div class="qibla-info">
-                <div class="qibla-label">Qibla</div>
+                <div class="qibla-label" data-i18n="qibla.label">Qibla</div>
                 <div class="qibla-degrees" id="qibla-degrees">—</div>
                 <div class="qibla-status" id="qibla-status"></div>
-                <button id="qibla-calibrate" class="qibla-calibrate" type="button" hidden>Enable live compass</button>
+                <button id="qibla-calibrate" class="qibla-calibrate" type="button" hidden data-i18n="qibla.enableBtn">Enable live compass</button>
             </div>
         </section>
 
         <section id="hadith-card" class="hadith-card" hidden>
             <div class="hadith-card-head">
-                <span class="hadith-card-label">Hadith of the Day</span>
+                <span class="hadith-card-label" data-i18n="popup.hadithOfDay">Hadith of the Day</span>
                 <span class="hadith-card-meta" id="hadith-card-meta"></span>
             </div>
             <p class="hadith-card-arab" id="hadith-card-arab"></p>
@@ -70,13 +71,13 @@
             <button id="audio-mini-stop" class="audio-mini-btn" type="button" aria-label="Stop">✕</button>
         </section>
 
-        <button id="open-quran" class="btn-read-quran" type="button">Read Qur'an</button>
-        <button id="open-hadith" class="btn-read-hadith" type="button">Browse Hadith</button>
-        <button id="open-azkar" class="btn-read-hadith" type="button">Open Azkar</button>
-        <button id="open-radio" class="btn-read-hadith" type="button">Open Radio</button>
+        <button id="open-quran" class="btn-read-quran" type="button" data-i18n="popup.openQuran">Read Qur'an</button>
+        <button id="open-hadith" class="btn-read-hadith" type="button" data-i18n="popup.openHadith">Browse Hadith</button>
+        <button id="open-azkar" class="btn-read-hadith" type="button" data-i18n="popup.openAzkar">Open Azkar</button>
+        <button id="open-radio" class="btn-read-hadith" type="button" data-i18n="popup.openRadio">Open Radio</button>
 
         <footer>
-            <a href="#" id="settings-link">Settings</a>
+            <a href="#" id="settings-link" data-i18n="popup.settings">Settings</a>
         </footer>
     </main>
     <script type="module" src="popup.js"></script>

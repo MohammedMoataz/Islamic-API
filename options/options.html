@@ -1,27 +1,47 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Prayer Times — Settings</title>
+    <link rel="stylesheet" href="../styles/theme.css">
     <link rel="stylesheet" href="options.css">
 </head>
 <body>
     <main class="container">
-        <h1>Prayer Times — Settings</h1>
+        <h1 data-i18n="options.title">Prayer Times — Settings</h1>
 
         <section class="card">
-            <h2>Location</h2>
+            <h2 data-i18n="options.display.title">Display</h2>
             <label>
-                <span>Country</span>
+                <span data-i18n="options.display.language">Language</span>
+                <select id="language">
+                    <option value="en" data-i18n="options.display.languageEn">English</option>
+                    <option value="ar" data-i18n="options.display.languageAr">العربية</option>
+                </select>
+            </label>
+            <label>
+                <span data-i18n="options.display.theme">Theme</span>
+                <select id="theme">
+                    <option value="auto" data-i18n="options.display.themeAuto">Match system</option>
+                    <option value="light" data-i18n="options.display.themeLight">Light</option>
+                    <option value="dark" data-i18n="options.display.themeDark">Dark</option>
+                </select>
+            </label>
+        </section>
+
+        <section class="card">
+            <h2 data-i18n="options.location.title">Location</h2>
+            <label>
+                <span data-i18n="options.location.country">Country</span>
                 <select id="country"></select>
             </label>
             <label>
-                <span>City</span>
+                <span data-i18n="options.location.city">City</span>
                 <select id="city"></select>
             </label>
             <label>
-                <span>Calculation method</span>
+                <span data-i18n="options.location.method">Calculation method</span>
                 <select id="method">
                     <option value="0">Shia Ithna-Ashari, Leva Institute, Qum</option>
                     <option value="1">University of Islamic Sciences, Karachi</option>
@@ -43,34 +63,34 @@
         </section>
 
         <section class="card">
-            <h2>Notifications</h2>
+            <h2 data-i18n="options.notifications.title">Notifications</h2>
             <label class="row">
                 <input id="notif-enabled" type="checkbox">
-                <span>Enable prayer notifications</span>
+                <span data-i18n="options.notifications.enabled">Enable prayer notifications</span>
             </label>
             <label>
-                <span>Remind me this many minutes <em>before</em> each prayer</span>
+                <span data-i18n="options.notifications.pre">Remind me this many minutes before each prayer</span>
                 <input id="notif-pre" type="number" min="0" max="60" step="1">
             </label>
-            <button id="test-notif" type="button" class="btn-secondary">Send test notification</button>
+            <button id="test-notif" type="button" class="btn-secondary" data-i18n="options.notifications.test">Send test notification</button>
         </section>
 
         <section class="card">
-            <h2>Hadith</h2>
+            <h2 data-i18n="options.hadith.title">Hadith</h2>
             <label>
-                <span>Default collection (Hadith of the Day)</span>
+                <span data-i18n="options.hadith.defaultBook">Default collection (Hadith of the Day)</span>
                 <select id="hadith-book"></select>
             </label>
         </section>
 
         <section class="card">
-            <h2>Azkar reminders</h2>
+            <h2 data-i18n="options.azkar.title">Azkar reminders</h2>
             <label class="row">
                 <input id="azkar-reminders" type="checkbox">
-                <span>Send azkar reminder notifications</span>
+                <span data-i18n="options.azkar.enabled">Send azkar reminder notifications</span>
             </label>
             <label>
-                <span>Average minutes between reminders (random within ±50%)</span>
+                <span data-i18n="options.azkar.interval">Average minutes between reminders (random within ±50%)</span>
                 <select id="azkar-interval">
                     <option value="60">~ 1 hour</option>
                     <option value="90">~ 1.5 hours</option>
@@ -80,23 +100,23 @@
                     <option value="360">~ 6 hours</option>
                 </select>
             </label>
-            <p class="card-note">
-                Windows follow your configured prayer times: <em>morning</em> azkar from <em>Fajr</em> to <em>Maghrib</em>, <em>evening</em> azkar from <em>Maghrib</em> to the next <em>Fajr</em>.
+            <p class="card-note" data-i18n="options.azkar.note">
+                Windows follow your configured prayer times: morning azkar from Fajr to Maghrib, evening azkar from Maghrib to the next Fajr.
             </p>
         </section>
 
         <section class="card">
-            <h2>Qur'an</h2>
+            <h2 data-i18n="options.quran.title">Qur'an</h2>
             <label>
-                <span>Tafsir edition</span>
+                <span data-i18n="options.quran.tafsir">Tafsir edition</span>
                 <select id="tafsir-slug"></select>
             </label>
             <label class="row">
                 <input id="tafsir-default" type="checkbox">
-                <span>Show tafsir by default when opening a surah</span>
+                <span data-i18n="options.quran.showTafsir">Show tafsir by default when opening a surah</span>
             </label>
             <label>
-                <span>Reciter (audio)</span>
+                <span data-i18n="options.quran.reciter">Reciter (audio)</span>
                 <select id="reciter">
                     <option value="">Loading…</option>
                 </select>
@@ -104,7 +124,7 @@
         </section>
 
         <div class="actions">
-            <button id="save-btn" type="button" class="btn-primary" disabled>Save</button>
+            <button id="save-btn" type="button" class="btn-primary" disabled data-i18n="options.save">Save</button>
             <p id="status" class="status" aria-live="polite"></p>
         </div>
     </main>

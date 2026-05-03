@@ -1,0 +1,87 @@
+/* Dark-mode CSS variable overrides. Loaded by every page BEFORE the page's
+   own stylesheet so :root[data-theme="dark"] selectors override the page's
+   light defaults. Page CSS is unchanged for the light path — no
+   [data-theme="light"] block needed. */
+
+:root[data-theme="dark"] {
+    --bg: #15181d;
+    --card: #1f242c;
+    --fg: #e7e9ee;
+    --muted: #8a92a0;
+    --accent: #4caf81;
+    --accent-soft: rgba(76, 175, 129, 0.16);
+    --border: #2a313b;
+    --done: #3a414b;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root[data-theme="auto"] {
+        --bg: #15181d;
+        --card: #1f242c;
+        --fg: #e7e9ee;
+        --muted: #8a92a0;
+        --accent: #4caf81;
+        --accent-soft: rgba(76, 175, 129, 0.16);
+        --border: #2a313b;
+        --done: #3a414b;
+    }
+}
+
+/* A handful of cross-page elements need explicit colour fixes in dark mode
+   because their CSS used hard-coded hex instead of variables. */
+
+:root[data-theme="dark"] #prayer-table thead th,
+@media (prefers-color-scheme: dark) {
+    :root[data-theme="auto"] #prayer-table thead th {
+        background: #232831 !important;
+    }
+}
+
+:root[data-theme="dark"] .error,
+:root[data-theme="dark"] #reader-error,
+:root[data-theme="dark"] #hadith-error,
+:root[data-theme="dark"] #azkar-error,
+:root[data-theme="dark"] #error {
+    background: #3b1d1d;
+    color: #ff8d8d;
+}
+
+:root[data-theme="dark"] .compass-ring,
+:root[data-theme="dark"] input[type="text"],
+:root[data-theme="dark"] input[type="number"],
+:root[data-theme="dark"] input[type="search"],
+:root[data-theme="dark"] select {
+    background: var(--card) !important;
+    color: var(--fg) !important;
+    border-color: var(--border) !important;
+}
+
+:root[data-theme="dark"] .needle-tail {
+    fill: #5a606a;
+}
+
+:root[data-theme="dark"] .compass-pin {
+    fill: var(--fg);
+}
+
+@media (prefers-color-scheme: dark) {
+    :root[data-theme="auto"] .error,
+    :root[data-theme="auto"] #reader-error,
+    :root[data-theme="auto"] #hadith-error,
+    :root[data-theme="auto"] #azkar-error,
+    :root[data-theme="auto"] #error {
+        background: #3b1d1d;
+        color: #ff8d8d;
+    }
+    :root[data-theme="auto"] .compass-ring,
+    :root[data-theme="auto"] input[type="text"],
+    :root[data-theme="auto"] input[type="number"],
+    :root[data-theme="auto"] input[type="search"],
+    :root[data-theme="auto"] select {
+        background: var(--card) !important;
+        color: var(--fg) !important;
+        border-color: var(--border) !important;
+    }
+    :root[data-theme="auto"] .needle-tail { fill: #5a606a; }
+    :root[data-theme="auto"] .compass-pin { fill: var(--fg); }
+}

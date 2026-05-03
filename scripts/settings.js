@@ -11,7 +11,9 @@ export const DEFAULT_SETTINGS = {
             enabled: false,           // opt-in
             avgIntervalMinutes: 180   // mean spacing between reminders within an active window
         }
-    }
+    },
+    language: "en",   // "en" | "ar"
+    theme: "auto"     // "auto" | "light" | "dark"
 };
 
 // hadis-api-id.vercel.app book slugs + canonical names + collection sizes.

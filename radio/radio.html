@@ -1,24 +1,25 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Qur'an Radio</title>
+    <link rel="stylesheet" href="../styles/theme.css">
     <link rel="stylesheet" href="radio.css">
 </head>
 <body>
     <header class="topbar">
-        <h1 class="brand">Qur'an Radio</h1>
-        <a href="#" id="open-options" class="topbar-link">Settings</a>
+        <h1 class="brand" data-i18n="radio.title">Qur'an Radio</h1>
+        <a href="#" id="open-options" class="topbar-link" data-i18n="popup.settings">Settings</a>
     </header>
 
     <main class="container">
         <div class="search-row">
-            <input id="search" type="search" placeholder="Search stations…" autocomplete="off">
+            <input id="search" type="search" data-i18n="radio.searchPlaceholder" placeholder="Search stations…" autocomplete="off">
         </div>
 
         <p id="error" class="error" hidden></p>
-        <p id="loading" class="loading">Loading stations…</p>
+        <p id="loading" class="loading" data-i18n="reader.loading">Loading stations…</p>
 
         <ul id="stations" class="stations-list" aria-label="Stations"></ul>
     </main>
