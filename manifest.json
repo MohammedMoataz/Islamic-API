@@ -1,8 +1,8 @@
 {
     "manifest_version": 3,
     "name": "Prayer Times Table",
-    "version": "1.6.0",
-    "description": "Prayer times, configurable city, Qur'an reader with recitation, hadith browser, and azkar tasbih.",
+    "version": "1.7.0",
+    "description": "Prayer times, Qur'an reader with recitation, hadith, azkar tasbih, and live Qur'an radio.",
     "icons": {
         "16": "images/icon-16.png",
         "48": "images/icon-48.png",
@@ -21,7 +21,8 @@
         "https://quranenc.com/*",
         "https://api.quran.com/*",
         "https://api.hadith.gading.dev/*",
-        "https://raw.githubusercontent.com/*"
+        "https://raw.githubusercontent.com/*",
+        "https://data-rosy.vercel.app/*"
     ],
     "background": {
         "service_worker": "background.js",

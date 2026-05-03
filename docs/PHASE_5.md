@@ -14,7 +14,9 @@
 | F2 | **Tap-to-count tasbih** on every card — large circular button shows remaining repetitions; tap decrements; reaches 0 → button changes state and the page auto-scrolls to the next dhikr. | Azkar page |
 | F3 | **Per-day persistence** — counts are stored with today's `YYYY-MM-DD` key. If the user reopens the page on a new day the counts are cleared so morning/evening azkar start fresh each day. | `chrome.storage.local["azkarCounts"]` |
 | F4 | **Manual reset** — every card has a small ↻ button that re-arms the counter to the dhikr's original target count. | Azkar page |
-| F5 | **Open Azkar** button alongside *Read Qur'an* and *Browse Hadith* in the popup. | Popup |
+| F5 | **Reset-all-in-category** — a *↻ Reset all* button at the top of each category clears every counter for that category in one storage write. For morning/evening categories it also clears the "notified today" set, so reminders can re-cover the same dhikrs. | Azkar page |
+| F6 | **Open Azkar** button alongside *Read Qur'an* and *Browse Hadith* in the popup. | Popup |
+| F7 | **Random-time reminder notifications** — when enabled in settings, the service worker fires a notification with one of the un-notified dhikrs at random intervals. Windows are **prayer-time relative**: morning runs from *Fajr* to *Maghrib*, evening from *Maghrib* to the next *Fajr*. Falls back to a clock split (05:00 ↔ 18:00) if timings can't be fetched. Each notified dhikr is **marked as done** (count → 0) and added to a per-day notified-set so the next tick picks something else; reminders cycle through the category instead of repeating. Click the notification → opens the azkar page on the right category. | Service worker + notifications |
 
 ---
 
@@ -143,11 +145,52 @@ The `date` field is matched against the browser's local `YYYY-MM-DD` on every pa
 
 ---
 
-## 10. Known Limitations (deferred)
+## 10. Reminder Notifications
+
+Settings → **Azkar reminders** → toggle + interval dropdown.
+
+```
+chrome.storage.sync["settings"].azkar.reminders = {
+  enabled: false,                 // opt-in
+  avgIntervalMinutes: 180         // 60–360
+}
+```
+
+Scheduler:
+- One-shot `azkar-tick` alarm with `delayInMinutes = avg/2 + random()*avg`
+  (uniform spread of `±50%` around the average).
+- On fire:
+  1. Reschedule the next tick first (so we never lose the cadence).
+  2. Detect window: read today's `timings.Fajr` and `timings.Maghrib` from the
+     cached Aladhan response. If now ∈ [Fajr, Maghrib) → morning; otherwise →
+     evening. (Both pre-Fajr and post-Maghrib count as evening, since Maghrib
+     → next-Fajr is one continuous evening window that crosses midnight.)
+     Falls back to a clock-only split (05:00 ↔ 18:00) when timings are
+     unreachable.
+  3. Build the eligible pool: dhikrs from the matching category that are
+     **not** in the per-day notified set **and** not already at count 0.
+     If the pool is empty (whole category covered for today), skip — the next
+     tick is still scheduled.
+  4. Pick a random dhikr from the pool.
+  5. `chrome.notifications.create("azkar:{idx}:{kind}", …)` — single id per
+     kind so a fresh reminder replaces the previous one rather than piling up
+     in the OS notification center.
+  6. `markNotified(kind, i)` + `setCount(category, i, 0)` — record the
+     surfacing and mark the dhikr as done so the open azkar page reflects
+     completion via the existing `chrome.storage.onChanged` listener.
+- Click handler: `chrome.notifications.onClicked` parses the id, opens
+  `azkar/azkar.html#{idx}`, and clears the notification.
+
+Why one-shot + reschedule (not periodic): `chrome.alarms` periodic alarms fire on a fixed cadence from creation time, which doesn't give the random feel the user asked for. One-shot with random delay produces genuinely random spacing while still being cheap (a single live alarm).
+
+The tick is recreated on every `scheduleToday()` (which `clearAll`s) and on
+every settings change (storage.onChanged → scheduleToday).
+
+## 11. Known Limitations (deferred)
 
 | Limitation | Resolved in |
 |---|---|
 | No Hisn al-Muslim secondary source — extended supplications for a chapter unavailable. | Future polish. |
 | No "share progress" / streak / history. | Out of scope. |
-| No per-category notification (e.g. "morning azkar reminder at 06:00"). | Future polish — would reuse `chrome.alarms`. |
 | Arabic only — no transliteration or English translation. | Future polish. |
+| Reminder windows are not configurable — they're tied to your configured prayer times (`Fajr` / `Maghrib`). Change city or calculation method in settings to shift them. | By design. |

@@ -87,7 +87,8 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
     // Tear the offscreen document down once playback truly ends or is stopped.
     if (msg?.type === "audio:state") {
         const s = msg.state;
-        if (s && !s.playing && !s.loading && (s.ended || s.surah === null)) {
+        const noTrack = s && s.surah === null && s.station === null;
+        if (s && !s.playing && !s.loading && (s.ended || noTrack)) {
             scheduleOffscreenClose();
         } else {
             cancelOffscreenClose();

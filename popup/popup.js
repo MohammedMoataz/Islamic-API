@@ -297,6 +297,10 @@ document.getElementById("open-azkar").addEventListener("click", () => {
     chrome.tabs.create({ url: chrome.runtime.getURL("azkar/azkar.html") });
 });
 
+document.getElementById("open-radio").addEventListener("click", () => {
+    chrome.tabs.create({ url: chrome.runtime.getURL("radio/radio.html") });
+});
+
 // ---------------------------------------------------------------- Audio mini
 
 let audioPlaying = false;
@@ -312,14 +316,19 @@ getAudioState().then((s) => { if (s) applyAudioMini(s); });
 
 function applyAudioMini(s) {
     audioPlaying = s.playing;
-    const hasTrack = s.surah !== null && !s.ended;
+    const hasTrack = (s.surah !== null || s.station !== null) && !s.ended;
     els.audioMini.hidden = !hasTrack;
     if (!hasTrack) return;
 
     els.audioMiniToggle.textContent = s.playing ? "⏸" : (s.loading ? "…" : "▶");
     els.audioMiniTitle.textContent = s.title || "—";
-    els.audioMiniTime.textContent =
-        `${formatClock(s.currentTime)} / ${formatClock(s.duration)}`;
+    if (s.station !== null || !s.duration) {
+        // Live stream / unknown duration — show "LIVE" instead of bogus clock.
+        els.audioMiniTime.textContent = s.station !== null ? "LIVE" : "—";
+    } else {
+        els.audioMiniTime.textContent =
+            `${formatClock(s.currentTime)} / ${formatClock(s.duration)}`;
+    }
 }
 
 function formatClock(seconds) {

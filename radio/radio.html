@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Qur'an Radio</title>
+    <link rel="stylesheet" href="radio.css">
+</head>
+<body>
+    <header class="topbar">
+        <h1 class="brand">Qur'an Radio</h1>
+        <a href="#" id="open-options" class="topbar-link">Settings</a>
+    </header>
+
+    <main class="container">
+        <div class="search-row">
+            <input id="search" type="search" placeholder="Search stations…" autocomplete="off">
+        </div>
+
+        <p id="error" class="error" hidden></p>
+        <p id="loading" class="loading">Loading stations…</p>
+
+        <ul id="stations" class="stations-list" aria-label="Stations"></ul>
+    </main>
+
+    <script type="module" src="radio.js"></script>
+</body>
+</html>

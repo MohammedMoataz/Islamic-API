@@ -9,15 +9,20 @@ let state = {
     loading: false,
     surah: null,
     reciter: null,
+    station: null,    // non-null when a live radio stream is the source
     title: "",
     currentTime: 0,
-    duration: 0,
+    duration: 0,      // 0 for radio (live, no finite duration)
     ended: false
 };
 
 function setState(patch) {
     state = { ...state, ...patch };
     chrome.runtime.sendMessage({ type: "audio:state", state }).catch(() => {});
+}
+
+function safeDuration() {
+    return Number.isFinite(audio.duration) ? audio.duration : 0;
 }
 
 audio.addEventListener("loadstart", () => setState({ loading: true, ended: false }));
@@ -27,11 +32,9 @@ audio.addEventListener("pause",     () => setState({ playing: false }));
 audio.addEventListener("ended",     () => setState({ playing: false, ended: true }));
 audio.addEventListener("timeupdate", () => setState({
     currentTime: audio.currentTime || 0,
-    duration: Number.isFinite(audio.duration) ? audio.duration : 0
+    duration: safeDuration()
 }));
-audio.addEventListener("durationchange", () => setState({
-    duration: Number.isFinite(audio.duration) ? audio.duration : 0
-}));
+audio.addEventListener("durationchange", () => setState({ duration: safeDuration() }));
 audio.addEventListener("error", () => setState({ playing: false, loading: false }));
 
 chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
@@ -47,10 +50,31 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
                 console.error("audio.play() rejected:", err);
                 setState({ loading: false, playing: false });
             });
+            // Switching to a surah clears any radio attribution.
             setState({
                 surah: msg.surah ?? state.surah,
                 reciter: msg.reciter ?? state.reciter,
+                station: null,
                 title: msg.title ?? state.title,
+                ended: false
+            });
+            break;
+        }
+        case "play-radio": {
+            const sameTrack = audio.src === msg.url;
+            if (!sameTrack) {
+                audio.src = msg.url;
+            }
+            audio.play().catch((err) => {
+                console.error("audio.play() rejected:", err);
+                setState({ loading: false, playing: false });
+            });
+            // Radio replaces any active surah session.
+            setState({
+                surah: null,
+                reciter: null,
+                station: msg.station ?? state.station,
+                title: msg.title ?? msg.station ?? state.title,
                 ended: false
             });
             break;
@@ -70,6 +94,7 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
                 loading: false,
                 surah: null,
                 reciter: null,
+                station: null,
                 title: "",
                 currentTime: 0,
                 duration: 0,

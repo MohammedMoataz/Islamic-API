@@ -16,6 +16,15 @@ export async function playSurah(reciterId, surah, title) {
     });
 }
 
+export async function playRadio(url, station) {
+    await ensureOffscreen();
+    return chrome.runtime.sendMessage({
+        target: "offscreen",
+        action: "play-radio",
+        url, station, title: station
+    });
+}
+
 export function pauseAudio() {
     return chrome.runtime.sendMessage({ target: "offscreen", action: "pause" });
 }
