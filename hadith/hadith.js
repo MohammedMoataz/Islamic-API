@@ -175,14 +175,14 @@ function renderHadiths(list) {
             (b) => b.book === state.currentBook && b.number === h.number
         );
 
+        const aria = `Toggle bookmark on ${localBookName(state.currentBook)} #${h.number}`;
         li.innerHTML = `
             <div class="hadith-num">#${h.number}</div>
             <p class="hadith-arab">${escapeHtml(h.arab)}</p>
             <p class="hadith-id">${escapeHtml(h.id)}</p>
             <div class="hadith-actions">
-                <button class="btn-bookmark${bookmarked ? " active" : ""}" type="button">
-                    ${bookmarked ? "🔖 Bookmarked" : "🔖 Bookmark"}
-                </button>
+                <button class="btn-bookmark${bookmarked ? " active" : ""}" type="button"
+                        aria-label="${escapeHtml(aria)}">${escapeHtml(bookmarked ? t("reader.btnBookmarked") : t("reader.btnBookmark"))}</button>
             </div>
         `;
         li.querySelector(".btn-bookmark").addEventListener("click", () =>
@@ -203,7 +203,7 @@ async function handleBookmark(book, number, rowEl) {
     const btn = rowEl.querySelector(".btn-bookmark");
     const now = await isBookmarked(book, number);
     btn.classList.toggle("active", now);
-    btn.textContent = now ? "🔖 Bookmarked" : "🔖 Bookmark";
+    btn.textContent = now ? t("reader.btnBookmarked") : t("reader.btnBookmark");
     renderBookmarks();
 }
 
@@ -251,7 +251,7 @@ chrome.storage.onChanged.addListener((changes, area) => {
         const btn = li.querySelector(".btn-bookmark");
         if (btn) {
             btn.classList.toggle("active", b);
-            btn.textContent = b ? "🔖 Bookmarked" : "🔖 Bookmark";
+            btn.textContent = b ? t("reader.btnBookmarked") : t("reader.btnBookmark");
         }
     }
 });

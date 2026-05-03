@@ -14,7 +14,7 @@
             <p id="hijri-line"></p>
         </header>
 
-        <div id="countdown" class="countdown" hidden>
+        <div id="countdown" class="countdown" hidden aria-live="polite">
             <span id="countdown-name"></span>
             <span class="countdown-sep" data-i18n="popup.in">in</span>
             <span id="countdown-value" class="countdown-value"></span>
@@ -64,7 +64,7 @@
 
         <section id="audio-mini" class="audio-mini" hidden aria-label="Qur'an audio">
             <button id="audio-mini-toggle" class="audio-mini-btn audio-mini-toggle" type="button" aria-label="Play / pause">⏸</button>
-            <div class="audio-mini-info">
+            <div class="audio-mini-info" aria-live="polite">
                 <div class="audio-mini-title" id="audio-mini-title">—</div>
                 <div class="audio-mini-time" id="audio-mini-time">0:00 / 0:00</div>
             </div>

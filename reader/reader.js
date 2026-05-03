@@ -221,16 +221,17 @@ function renderAyat(data) {
             (b) => b.surah === data.number && b.ayah === ayah.numberInSurah
         );
 
+        const ayahLabel = `${data.englishName} ${data.number}:${ayah.numberInSurah}`;
         li.innerHTML = `
             <p class="ayah-text">
                 ${escapeHtml(text)}
                 <span class="ayah-num">﴿${toArabicDigits(ayah.numberInSurah)}﴾</span>
             </p>
             <div class="ayah-actions">
-                <button class="btn-tafsir" type="button">📖 Tafsir</button>
-                <button class="btn-bookmark${bookmarked ? " active" : ""}" type="button">
-                    ${bookmarked ? "🔖 Bookmarked" : "🔖 Bookmark"}
-                </button>
+                <button class="btn-tafsir" type="button"
+                        aria-label="Toggle tafsir for ${escapeHtml(ayahLabel)}">${escapeHtml(t("reader.btnTafsir"))}</button>
+                <button class="btn-bookmark${bookmarked ? " active" : ""}" type="button"
+                        aria-label="Toggle bookmark on ${escapeHtml(ayahLabel)}">${escapeHtml(bookmarked ? t("reader.btnBookmarked") : t("reader.btnBookmark"))}</button>
             </div>
         `;
 
@@ -275,7 +276,7 @@ async function handleBookmark(surah, ayah, rowEl) {
     const btn = rowEl.querySelector(".btn-bookmark");
     const now = await isBookmarked(surah, ayah);
     btn.classList.toggle("active", now);
-    btn.textContent = now ? "🔖 Bookmarked" : "🔖 Bookmark";
+    btn.textContent = now ? t("reader.btnBookmarked") : t("reader.btnBookmark");
     renderBookmarks();
 }
 
@@ -377,7 +378,7 @@ chrome.storage.onChanged.addListener((changes, area) => {
             const btn = li.querySelector(".btn-bookmark");
             if (btn) {
                 btn.classList.toggle("active", b);
-                btn.textContent = b ? "🔖 Bookmarked" : "🔖 Bookmark";
+                btn.textContent = b ? t("reader.btnBookmarked") : t("reader.btnBookmark");
             }
         }
     }

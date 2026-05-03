@@ -3,6 +3,7 @@
 import { cacheGet, cacheSet } from "./cache.js";
 import { HADITH_BOOKS } from "./settings.js";
 import { localDateKey } from "./utility.js";
+import { withRetry } from "./retry.js";
 
 const PAGE_TTL = 7 * 24 * 60 * 60 * 1000; // 7 days
 const PAGE_SIZE = 300;                    // hadiths per network call
@@ -22,27 +23,34 @@ export async function fetchHadithPage(book, networkPage) {
     const url =
         `https://api.hadith.gading.dev/books/${encodeURIComponent(book)}` +
         `?range=${startNumber}-${endNumber}`;
-    const res = await fetch(url);
-    if (!res.ok) throw new Error(`Hadith ${book} p.${networkPage} failed: ${res.status}`);
-    const json = await res.json();
-    const data = json?.data ?? json;
-    const hadiths = data?.hadiths ?? [];
-    if (!Array.isArray(hadiths)) throw new Error("Malformed hadith response");
 
-    const normalised = {
-        number: data?.number ?? null,
-        name:   data?.name ?? bookTitle(book),
-        available: data?.available ?? null,
-        requested: data?.requested ?? hadiths.length,
-        hadiths: hadiths.map((h) => ({
-            number: Number(h.number ?? 0),
-            arab:   String(h.arab ?? ""),
-            id:     String(h.id ?? "")
-        }))
-    };
-
-    await cacheSet(key, normalised, PAGE_TTL);
-    return normalised;
+    try {
+        const normalised = await withRetry(async () => {
+            const res = await fetch(url);
+            if (!res.ok) throw new Error(`Hadith ${book} p.${networkPage} failed: ${res.status}`);
+            const json = await res.json();
+            const data = json?.data ?? json;
+            const hadiths = data?.hadiths ?? [];
+            if (!Array.isArray(hadiths)) throw new Error("Malformed hadith response");
+            return {
+                number: data?.number ?? null,
+                name:   data?.name ?? bookTitle(book),
+                available: data?.available ?? null,
+                requested: data?.requested ?? hadiths.length,
+                hadiths: hadiths.map((h) => ({
+                    number: Number(h.number ?? 0),
+                    arab:   String(h.arab ?? ""),
+                    id:     String(h.id ?? "")
+                }))
+            };
+        });
+        await cacheSet(key, normalised, PAGE_TTL);
+        return normalised;
+    } catch (err) {
+        const stale = await cacheGet(key, { staleOk: true });
+        if (stale && Array.isArray(stale.hadiths)) return stale;
+        throw err;
+    }
 }
 
 // Fetch a specific hadith by its 1-based number across the whole collection.

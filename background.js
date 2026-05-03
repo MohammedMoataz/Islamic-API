@@ -189,7 +189,7 @@ async function scheduleToday() {
 async function ensureAzkarTick(settings) {
     await chrome.alarms.clear("azkar-tick");
     if (!settings.azkar?.reminders?.enabled) return;
-    const avg = clampInt(settings.azkar.reminders.avgIntervalMinutes, 30, 360, 180);
+    const avg = clampInt(settings.azkar.reminders.avgIntervalMinutes, 15, 360, 180);
     scheduleNextAzkarTick(avg);
 }
 
@@ -207,7 +207,7 @@ async function onAzkarTick() {
     try {
         const settings = await getSettings();
         if (!settings.azkar?.reminders?.enabled) return;
-        avg = clampInt(settings.azkar.reminders.avgIntervalMinutes, 30, 360, 180);
+        avg = clampInt(settings.azkar.reminders.avgIntervalMinutes, 15, 360, 180);
     } finally {
         scheduleNextAzkarTick(avg);
     }

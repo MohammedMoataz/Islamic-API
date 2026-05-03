@@ -1,7 +1,25 @@
-/* Dark-mode CSS variable overrides. Loaded by every page BEFORE the page's
-   own stylesheet so :root[data-theme="dark"] selectors override the page's
-   light defaults. Page CSS is unchanged for the light path — no
-   [data-theme="light"] block needed. */
+/* Theme + a11y baseline. Loaded by every page BEFORE the page's own
+   stylesheet so :root[data-theme="dark"] selectors override the page's
+   light defaults, and the keyboard-focus rule applies everywhere. */
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+[role="button"]:focus-visible,
+summary:focus-visible,
+li:focus-visible {
+    outline: 2px solid var(--accent, #1a7f5a);
+    outline-offset: 2px;
+    border-radius: inherit;
+}
+
+/* Mouse / touch focus shouldn't show the ring — only keyboard navigation. */
+button:focus:not(:focus-visible),
+a:focus:not(:focus-visible) {
+    outline: none;
+}
+
 
 :root[data-theme="dark"] {
     --bg: #15181d;

@@ -2,6 +2,7 @@
 
 import { cacheGet, cacheSet } from "./cache.js";
 import { localDateKey } from "./utility.js";
+import { withRetry } from "./retry.js";
 
 const AZKAR_URL =
     "https://raw.githubusercontent.com/nawafalqari/azkar-api/" +
@@ -22,35 +23,22 @@ export async function fetchAzkar() {
     const cached = await cacheGet("azkar:nawaf");
     if (Array.isArray(cached) && cached.length > 0 && cached[0].items) return cached;
 
-    const res = await fetch(AZKAR_URL);
-    if (!res.ok) throw new Error(`Azkar fetch failed: ${res.status}`);
-    const json = await res.json();
-
-    const grouped = normalise(json);
-    if (!grouped.length) throw new Error("Malformed azkar response");
-
-    // One-shot debug — surfaces the raw shape so we can adjust aliases if a
-    // future upstream change drops a field. Only logs on cache miss.
-    const sample = firstSample(json);
-    if (sample) console.log("[azkar] sample raw item:", sample, "keys:", Object.keys(sample));
-
-    await cacheSet("azkar:nawaf", grouped, AZKAR_TTL);
-    return grouped;
-}
-
-function firstSample(json) {
-    if (Array.isArray(json)) return json[0];
-    if (json && typeof json === "object") {
-        for (const v of Object.values(json)) {
-            if (Array.isArray(v) && v.length) return v[0];
-            if (v && typeof v === "object") {
-                for (const inner of Object.values(v)) {
-                    if (Array.isArray(inner) && inner.length) return inner[0];
-                }
-            }
-        }
+    try {
+        const grouped = await withRetry(async () => {
+            const res = await fetch(AZKAR_URL);
+            if (!res.ok) throw new Error(`Azkar fetch failed: ${res.status}`);
+            const json = await res.json();
+            const arr = normalise(json);
+            if (!arr.length) throw new Error("Malformed azkar response");
+            return arr;
+        });
+        await cacheSet("azkar:nawaf", grouped, AZKAR_TTL);
+        return grouped;
+    } catch (err) {
+        const stale = await cacheGet("azkar:nawaf", { staleOk: true });
+        if (Array.isArray(stale) && stale.length > 0 && stale[0].items) return stale;
+        throw err;
     }
-    return null;
 }
 
 function normalise(json) {

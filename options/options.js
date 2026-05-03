@@ -180,7 +180,7 @@ async function save() {
                 enabled: els.azkarReminders.checked,
                 avgIntervalMinutes: clampInt(
                     els.azkarInterval.value,
-                    30, 360,
+                    15, 360,
                     DEFAULT_SETTINGS.azkar.reminders.avgIntervalMinutes
                 )
             }

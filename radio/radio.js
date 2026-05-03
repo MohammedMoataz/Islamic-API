@@ -66,10 +66,10 @@ function renderStations() {
             : "";
 
         li.innerHTML = `
-            <button class="play-btn" type="button" aria-label="Play / stop">${playing ? "⏸" : "▶"}</button>
+            <button class="play-btn" type="button" aria-label="Play / stop ${escapeHtml(s.name)}">${playing ? "⏸" : "▶"}</button>
             <div class="station-info">
                 <div class="station-name">${escapeHtml(s.name)}</div>
-                <div class="station-status">${escapeHtml(playing ? t("radio.statusPlaying") : t("radio.statusIdle"))}</div>
+                <div class="station-status" aria-live="polite">${escapeHtml(playing ? t("radio.statusPlaying") : t("radio.statusIdle"))}</div>
             </div>
             ${lastBadge}
         `;
