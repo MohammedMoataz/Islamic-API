@@ -5,7 +5,10 @@ export const DEFAULT_SETTINGS = {
     notifications: { enabled: true, preMinutes: 5 },
     quran: { tafsirSlug: "arabic_moyassar", showTafsirByDefault: false },
     audio: { reciterId: 7 },   // Mishary Rashid Alafasy
-    hadith: { defaultBook: "bukhari" },
+    hadith: {
+        defaultBook: "bukhari",
+        dailyNotification: { enabled: true, hour: 15, minute: 0 }
+    },
     azkar: {
         reminders: {
             enabled: false,           // opt-in

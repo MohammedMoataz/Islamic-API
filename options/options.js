@@ -16,6 +16,8 @@ const els = {
     tafsirDefault: document.getElementById("tafsir-default"),
     reciter: document.getElementById("reciter"),
     hadithBook: document.getElementById("hadith-book"),
+    hadithDailyEnabled: document.getElementById("hadith-daily-enabled"),
+    hadithDailyTime: document.getElementById("hadith-daily-time"),
     azkarReminders: document.getElementById("azkar-reminders"),
     azkarInterval: document.getElementById("azkar-interval"),
     language: document.getElementById("language"),
@@ -104,6 +106,10 @@ function applyToForm(s) {
         ? s.hadith.defaultBook
         : DEFAULT_SETTINGS.hadith.defaultBook;
     els.hadithBook.value = knownBook;
+    els.hadithDailyEnabled.checked = !!s.hadith?.dailyNotification?.enabled;
+    const h = String(s.hadith?.dailyNotification?.hour ?? 15).padStart(2, "0");
+    const mm = String(s.hadith?.dailyNotification?.minute ?? 0).padStart(2, "0");
+    els.hadithDailyTime.value = `${h}:${mm}`;
     els.azkarReminders.checked = !!s.azkar?.reminders?.enabled;
     const knownInterval = String(s.azkar?.reminders?.avgIntervalMinutes ?? DEFAULT_SETTINGS.azkar.reminders.avgIntervalMinutes);
     if ([...els.azkarInterval.options].some((o) => o.value === knownInterval)) {
@@ -124,6 +130,8 @@ function snapshotForm() {
         tafsirDefault: els.tafsirDefault.checked,
         reciter: els.reciter.value,
         hadithBook: els.hadithBook.value,
+        hadithDailyEnabled: els.hadithDailyEnabled.checked,
+        hadithDailyTime: els.hadithDailyTime.value,
         azkarReminders: els.azkarReminders.checked,
         azkarInterval: els.azkarInterval.value,
         language: els.language.value,
@@ -147,6 +155,15 @@ function clampInt(raw, min, max, fallback) {
     const n = parseInt(raw, 10);
     if (Number.isNaN(n)) return fallback;
     return Math.max(min, Math.min(max, n));
+}
+
+function parseHHMM(value) {
+    const m = String(value || "").match(/^(\d{1,2}):(\d{2})$/);
+    if (!m) return { hour: 15, minute: 0 };
+    return {
+        hour: clampInt(m[1], 0, 23, 15),
+        minute: clampInt(m[2], 0, 59, 0)
+    };
 }
 
 async function save() {
@@ -173,7 +190,11 @@ async function save() {
             reciterId: parseInt(els.reciter.value, 10) || DEFAULT_SETTINGS.audio.reciterId
         },
         hadith: {
-            defaultBook: els.hadithBook.value || DEFAULT_SETTINGS.hadith.defaultBook
+            defaultBook: els.hadithBook.value || DEFAULT_SETTINGS.hadith.defaultBook,
+            dailyNotification: {
+                enabled: els.hadithDailyEnabled.checked,
+                ...parseHHMM(els.hadithDailyTime.value)
+            }
         },
         azkar: {
             reminders: {
@@ -219,7 +240,7 @@ els.country.addEventListener("change", () => {
 });
 
 // Any other change just toggles dirty UI.
-[els.city, els.method, els.notifEnabled, els.notifPre, els.tafsirSlug, els.tafsirDefault, els.reciter, els.hadithBook, els.azkarReminders, els.azkarInterval, els.language, els.theme].forEach((el) => {
+[els.city, els.method, els.notifEnabled, els.notifPre, els.tafsirSlug, els.tafsirDefault, els.reciter, els.hadithBook, els.hadithDailyEnabled, els.hadithDailyTime, els.azkarReminders, els.azkarInterval, els.language, els.theme].forEach((el) => {
     el.addEventListener("change", updateDirtyUI);
     el.addEventListener("input", updateDirtyUI);
 });

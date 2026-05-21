@@ -14,6 +14,8 @@ import {
 import {
     fetchAzkar, getCounts, setCount, getNotifiedSet, markNotified, countKey
 } from "./scripts/azkar.js";
+import { dailyHadith, bookTitle } from "./scripts/hadith.js";
+import { loadLocale, t } from "./scripts/i18n.js";
 
 const ICON_URL = chrome.runtime.getURL("images/icon-128.png");
 const BADGE_COLOR = "#1a7f5a";
@@ -45,17 +47,31 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
     if (alarm.name === "azkar-tick") {
         return onAzkarTick();
     }
+    if (alarm.name === "hadith-daily") {
+        return onHadithDailyTick();
+    }
 });
 
-// Open the azkar page on the right category when the user clicks a reminder.
+// Route notification clicks back to the right page.
 chrome.notifications.onClicked.addListener((notifId) => {
-    if (!notifId.startsWith("azkar:")) return;
-    const idx = parseInt(notifId.split(":")[1], 10);
-    const url = Number.isFinite(idx)
-        ? `azkar/azkar.html#${idx}`
-        : "azkar/azkar.html";
-    chrome.tabs.create({ url: chrome.runtime.getURL(url) });
-    chrome.notifications.clear(notifId);
+    if (notifId.startsWith("azkar:")) {
+        const idx = parseInt(notifId.split(":")[1], 10);
+        const url = Number.isFinite(idx)
+            ? `azkar/azkar.html#${idx}`
+            : "azkar/azkar.html";
+        chrome.tabs.create({ url: chrome.runtime.getURL(url) });
+        chrome.notifications.clear(notifId);
+        return;
+    }
+    if (notifId.startsWith("hadith:")) {
+        // Format: hadith:{book}:{number}
+        const [, book, number] = notifId.split(":");
+        const url = book && number
+            ? `hadith/hadith.html#${book}:${number}`
+            : "hadith/hadith.html";
+        chrome.tabs.create({ url: chrome.runtime.getURL(url) });
+        chrome.notifications.clear(notifId);
+    }
 });
 
 // Re-schedule whenever the user changes settings.
@@ -177,6 +193,9 @@ async function scheduleToday() {
         // Azkar reminders (opt-in). scheduleToday clearAll'd above, so always
         // recreate the tick if enabled.
         await ensureAzkarTick(settings);
+
+        // Daily Hadith of the Day notification.
+        await scheduleDailyHadith(settings);
     } catch (err) {
         console.error("scheduleToday failed:", err);
         // Try again in 30 minutes if the network was down.
@@ -302,6 +321,68 @@ function clampInt(raw, min, max, fallback) {
     const n = parseInt(raw, 10);
     if (!Number.isFinite(n)) return fallback;
     return Math.max(min, Math.min(max, n));
+}
+
+// ---------------------------------------------------- Daily Hadith reminder
+
+async function scheduleDailyHadith(settings) {
+    await chrome.alarms.clear("hadith-daily");
+    const cfg = settings?.hadith?.dailyNotification;
+    if (!cfg?.enabled) return;
+    const hour = clampInt(cfg.hour, 0, 23, 15);
+    const minute = clampInt(cfg.minute, 0, 59, 0);
+    chrome.alarms.create("hadith-daily", { when: nextDailyAt(hour, minute) });
+}
+
+function nextDailyAt(hour, minute) {
+    const target = new Date();
+    target.setHours(hour, minute, 0, 0);
+    if (target.getTime() <= Date.now()) {
+        target.setDate(target.getDate() + 1);
+    }
+    return target.getTime();
+}
+
+async function onHadithDailyTick() {
+    // Reschedule for tomorrow first so a fetch failure doesn't break the cadence.
+    let cfg = null;
+    try {
+        const settings = await getSettings();
+        cfg = settings?.hadith?.dailyNotification;
+        if (cfg?.enabled) {
+            const hour = clampInt(cfg.hour, 0, 23, 15);
+            const minute = clampInt(cfg.minute, 0, 59, 0);
+            chrome.alarms.create("hadith-daily", { when: nextDailyAt(hour, minute) });
+        }
+    } catch (err) {
+        console.warn("hadith-daily: getSettings failed", err?.message ?? err);
+    }
+    if (!cfg?.enabled) return;
+
+    try {
+        const settings = await getSettings();
+        const book = settings?.hadith?.defaultBook ?? "bukhari";
+        const { hadith, number } = await dailyHadith(book);
+        if (!hadith) return;
+
+        await loadLocale();
+        const bookName = t(`hadith.book.${book}`, bookTitle(book));
+        const title = `${t("popup.hadithOfDay")} · ${bookName}`;
+        const arab = String(hadith.arab || "").trim();
+        const message = arab.length > 240 ? arab.slice(0, 240) + "…" : (arab || "—");
+        const num = hadith.number || number;
+
+        chrome.notifications.create(`hadith:${book}:${num}`, {
+            type: "basic",
+            iconUrl: ICON_URL,
+            title,
+            message,
+            contextMessage: `#${num}`,
+            priority: 1
+        });
+    } catch (err) {
+        console.warn("hadith-daily: skipped", err?.message ?? err);
+    }
 }
 
 async function updateBadge() {
