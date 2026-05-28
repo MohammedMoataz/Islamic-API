@@ -69,7 +69,10 @@ export function formatBadge(ms) {
     const totalMin = Math.ceil(ms / 60_000);
     if (totalMin < 60) return `${totalMin}m`;
     const hours = Math.floor(totalMin / 60);
-    return `${hours}h`;
+    const mins = totalMin % 60;
+    // Show minutes beside the hour, clock-style (e.g. "2h05"). The badge fits
+    // ~4 glyphs, so this stays legible up to 9h59.
+    return `${hours}:${String(mins).padStart(2, "0")}h`;
 }
 
 // "14 Dhū al-Qaʿdah 1447 AH"

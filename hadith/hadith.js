@@ -162,7 +162,7 @@ function renderHadiths(list) {
     els.list.innerHTML = "";
     if (list.length === 0) {
         els.error.hidden = false;
-        els.error.textContent = "No hadiths returned for this page.";
+        els.error.textContent = t("hadith.errorLoad");
         return;
     }
     for (const h of list) {

@@ -7,13 +7,20 @@ import { withRetry } from "./retry.js";
 const RECITERS_TTL = 30 * 24 * 60 * 60 * 1000;
 const AUDIO_TTL    = 30 * 24 * 60 * 60 * 1000;
 
-export async function fetchReciters() {
-    const cached = await cacheGet("reciters");
+// `locale` ("en" | "ar") is forwarded to api.quran.com so translated_name.name
+// comes back in the user's language. Cache key includes the locale so
+// switching language doesn't serve a stale-but-fresh list.
+export async function fetchReciters(locale = "en") {
+    const lang = locale === "ar" ? "ar" : "en";
+    const cacheKey = `reciters:${lang}`;
+    const cached = await cacheGet(cacheKey);
     if (Array.isArray(cached) && cached.length > 0) return cached;
 
     try {
         const list = await withRetry(async () => {
-            const res = await fetch("https://api.quran.com/api/v4/resources/recitations");
+            const res = await fetch(
+                `https://api.quran.com/api/v4/resources/recitations?language=${lang}`
+            );
             if (!res.ok) throw new Error(`Reciters request failed: ${res.status}`);
             const json = await res.json();
             const arr = json?.recitations;
@@ -22,10 +29,10 @@ export async function fetchReciters() {
             }
             return arr;
         });
-        await cacheSet("reciters", list, RECITERS_TTL);
+        await cacheSet(cacheKey, list, RECITERS_TTL);
         return list;
     } catch (err) {
-        const stale = await cacheGet("reciters", { staleOk: true });
+        const stale = await cacheGet(cacheKey, { staleOk: true });
         if (Array.isArray(stale) && stale.length) return stale;
         return RECITER_FALLBACKS;
     }

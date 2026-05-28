@@ -2,7 +2,16 @@
 
 export const DEFAULT_SETTINGS = {
     location: { city: "Cairo", country: "Egypt", method: 5 },
-    notifications: { enabled: true, preMinutes: 5 },
+    notifications: {
+        enabled: true,
+        preMinutes: 5,
+        // Iqama (الإقامة) — typical post-adhan intervals. Defaults match the
+        // widely-used Jordanian Awqaf schedule; user can adjust each prayer.
+        iqama: {
+            enabled: false,
+            offsets: { Fajr: 30, Dhuhr: 15, Asr: 15, Maghrib: 5, Isha: 10 }
+        }
+    },
     quran: { tafsirSlug: "arabic_moyassar", showTafsirByDefault: false },
     audio: { reciterId: 7 },   // Mishary Rashid Alafasy
     hadith: {

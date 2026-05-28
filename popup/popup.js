@@ -45,7 +45,7 @@ let countdownTimer = null;
 (async function init() {
     try {
         const settings = await getSettings();
-        els.cityLine.textContent = `${settings.location.city}, ${settings.location.country}`;
+        els.cityLine.textContent = `${t("popup.cityFallback")} · ${settings.location.city}, ${settings.location.country}`;
 
         const data = await fetchTimings(settings.location);
         if (!data?.timings || typeof data.timings.Fajr !== "string") {

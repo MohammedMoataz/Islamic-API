@@ -31,7 +31,7 @@ header {
 
 header h1 {
     margin: 4px 0 2px;
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     font-weight: 600;
     color: var(--muted);
     text-transform: uppercase;
@@ -40,7 +40,7 @@ header h1 {
 
 #hijri-line {
     margin: 0;
-    font-size: 0.78rem;
+    font-size: var(--fs-xs);
     color: var(--muted);
 }
 
@@ -59,7 +59,7 @@ header h1 {
     border-radius: 10px;
     padding: 10px 12px;
     margin-bottom: 12px;
-    font-size: 0.95rem;
+    font-size: var(--fs-base);
 }
 
 .countdown #countdown-name {
@@ -69,7 +69,7 @@ header h1 {
 
 .countdown .countdown-sep {
     color: var(--muted);
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
 }
 
 .countdown .countdown-value {
@@ -82,7 +82,7 @@ header h1 {
     color: #a33;
     padding: 8px 12px;
     border-radius: 8px;
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     margin: 0 0 12px;
 }
 
@@ -94,7 +94,7 @@ header h1 {
     border-collapse: separate;
     border-spacing: 0;
     overflow: hidden;
-    font-size: 0.95rem;
+    font-size: var(--fs-base);
 }
 
 #prayer-table th,
@@ -320,7 +320,7 @@ header h1 {
     padding: 10px 14px;
     border: none;
     border-radius: 10px;
-    font-size: 0.95rem;
+    font-size: var(--fs-base);
     font-weight: 600;
     cursor: pointer;
 }
@@ -383,7 +383,7 @@ header h1 {
     direction: rtl;
     margin: 0 0 6px;
     font-family: "Amiri Quran", "Scheherazade New", "Traditional Arabic", serif;
-    font-size: 1.05rem;
+    font-size: var(--fs-arabic-sm);
     line-height: 1.7;
     color: var(--fg);
     /* Clamp to ~3 lines so long hadiths don't blow up the popup. */

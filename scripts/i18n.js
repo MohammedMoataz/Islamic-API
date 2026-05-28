@@ -16,6 +16,18 @@ const STRINGS = {
         "popup.headerPrayer":   "Prayer",
         "popup.headerTime":     "Time",
         "popup.hadithOfDay":    "Hadith of the Day",
+        // Notifications -------------------------------------------------
+        "notif.prayer.title":   "Prayer time: {name}",
+        "notif.prayer.body":    "{name} is now.",
+        "notif.pre.title":      "Upcoming prayer: {name}",
+        "notif.pre.body":       "{name} is in {mins} minute{plural}.",
+        "notif.iqama.title":    "Iqama: {name}",
+        "notif.iqama.body":     "Time to line up for {name}.",
+        "notif.test.title":     "Test notification",
+        "notif.test.body":      "If you can see this, notifications are working.",
+        "notif.azkar.morning":  "Morning Azkar",
+        "notif.azkar.evening":  "Evening Azkar",
+        "notif.azkar.repeat":   "Repeat × {count}",
         // Prayer names ---------------------------------------------------
         "prayer.Fajr":          "Fajr",
         "prayer.Dhuhr":         "Dhuhr",
@@ -54,6 +66,38 @@ const STRINGS = {
         "options.azkar.enabled":         "Send azkar reminder notifications",
         "options.azkar.interval":        "Average minutes between reminders (random within ±50%)",
         "options.azkar.note":            "Windows follow your configured prayer times: morning azkar from Fajr to Maghrib, evening azkar from Maghrib to the next Fajr.",
+        "options.azkar.interval.15":     "~ 15 minutes",
+        "options.azkar.interval.30":     "~ 30 minutes",
+        "options.azkar.interval.60":     "~ 1 hour",
+        "options.azkar.interval.90":     "~ 1.5 hours",
+        "options.azkar.interval.120":    "~ 2 hours",
+        "options.azkar.interval.180":    "~ 3 hours",
+        "options.azkar.interval.240":    "~ 4 hours",
+        "options.azkar.interval.360":    "~ 6 hours",
+        "options.method.0":              "Shia Ithna-Ashari, Leva Institute, Qum",
+        "options.method.1":              "University of Islamic Sciences, Karachi",
+        "options.method.2":              "Islamic Society of North America",
+        "options.method.3":              "Muslim World League",
+        "options.method.4":              "Umm Al-Qura University, Makkah",
+        "options.method.5":              "Egyptian General Authority of Survey",
+        "options.method.7":              "Institute of Geophysics, University of Tehran",
+        "options.method.8":              "Gulf Region",
+        "options.method.9":              "Kuwait",
+        "options.method.10":             "Qatar",
+        "options.method.11":             "Majlis Ugama Islam Singapura, Singapore",
+        "options.method.12":             "Union Organization Islamic de France",
+        "options.method.13":             "Diyanet İşleri Başkanlığı, Turkey",
+        "options.method.14":             "Spiritual Administration of Muslims of Russia",
+        "options.method.15":             "Moonsighting Committee Worldwide",
+        "options.iqama.title":           "Iqama reminders",
+        "options.iqama.enabled":         "Notify me at iqama time (configurable minutes after each adhan)",
+        "options.iqama.offset.Fajr":     "Fajr — minutes after adhan",
+        "options.iqama.offset.Dhuhr":    "Dhuhr — minutes after adhan",
+        "options.iqama.offset.Asr":      "Asr — minutes after adhan",
+        "options.iqama.offset.Maghrib":  "Maghrib — minutes after adhan",
+        "options.iqama.offset.Isha":     "Isha — minutes after adhan",
+        "reciter.style.Mujawwad":        "Mujawwad",
+        "reciter.style.Murattal":        "Murattal",
         "options.display.title":         "Display",
         "options.display.language":      "Language",
         "options.display.languageEn":    "English",
@@ -84,6 +128,11 @@ const STRINGS = {
         "reader.btnListen":         "▶ Listen",
         "reader.btnPause":          "⏸ Pause",
         "reader.btnLoading":        "Loading…",
+        "reader.errorLoad":         "Failed to load surah {n}. Check your connection.",
+        "reader.ayat":              "ayat",
+        "reader.surah":             "Surah",
+        "reader.revelation.Meccan": "Meccan",
+        "reader.revelation.Medinan":"Medinan",
         // Hadith ---------------------------------------------------------
         "hadith.title":             "Hadith",
         "hadith.bookmarksEmpty":    "No bookmarks yet — tap 🔖 on any hadith.",
@@ -111,6 +160,8 @@ const STRINGS = {
         "azkar.target":             "Target",
         "azkar.supplications":      "supplications",
         "azkar.errorLoad":          "Failed to load azkar. Check your connection.",
+        "azkar.reset":              "Reset",
+        "azkar.empty":              "—",
         // Radio ----------------------------------------------------------
         "radio.title":              "Qur'an Radio",
         "radio.searchPlaceholder":  "Search stations…",
@@ -134,6 +185,18 @@ const STRINGS = {
         "popup.headerPrayer":   "الصلاة",
         "popup.headerTime":     "الوقت",
         "popup.hadithOfDay":    "حديث اليوم",
+        // Notifications -------------------------------------------------
+        "notif.prayer.title":   "حان وقت {name}",
+        "notif.prayer.body":    "حان وقت صلاة {name} الآن.",
+        "notif.pre.title":      "صلاة قادمة: {name}",
+        "notif.pre.body":       "صلاة {name} بعد {mins} دقيقة.",
+        "notif.iqama.title":    "إقامة صلاة {name}",
+        "notif.iqama.body":     "حان وقت إقامة صلاة {name}.",
+        "notif.test.title":     "إشعار تجريبي",
+        "notif.test.body":      "إذا كنت ترى هذا، فإن الإشعارات تعمل.",
+        "notif.azkar.morning":  "أذكار الصباح",
+        "notif.azkar.evening":  "أذكار المساء",
+        "notif.azkar.repeat":   "كرر × {count}",
         // Prayer names ---------------------------------------------------
         "prayer.Fajr":          "الفجر",
         "prayer.Dhuhr":         "الظهر",
@@ -172,6 +235,38 @@ const STRINGS = {
         "options.azkar.enabled":         "إرسال إشعارات تذكير الأذكار",
         "options.azkar.interval":        "متوسط الدقائق بين التذكيرات (عشوائي ضمن ±٥٠٪)",
         "options.azkar.note":            "تتبع الفترات أوقات الصلاة: أذكار الصباح من الفجر إلى المغرب، أذكار المساء من المغرب إلى الفجر التالي.",
+        "options.azkar.interval.15":     "~ ١٥ دقيقة",
+        "options.azkar.interval.30":     "~ ٣٠ دقيقة",
+        "options.azkar.interval.60":     "~ ساعة واحدة",
+        "options.azkar.interval.90":     "~ ساعة ونصف",
+        "options.azkar.interval.120":    "~ ساعتان",
+        "options.azkar.interval.180":    "~ ٣ ساعات",
+        "options.azkar.interval.240":    "~ ٤ ساعات",
+        "options.azkar.interval.360":    "~ ٦ ساعات",
+        "options.method.0":              "الشيعة الإثنا عشرية، معهد ليفا، قُم",
+        "options.method.1":              "جامعة العلوم الإسلامية، كراتشي",
+        "options.method.2":              "الجمعية الإسلامية لأمريكا الشمالية",
+        "options.method.3":              "رابطة العالم الإسلامي",
+        "options.method.4":              "جامعة أم القرى، مكة المكرمة",
+        "options.method.5":              "الهيئة المصرية العامة للمساحة",
+        "options.method.7":              "معهد الجيوفيزياء، جامعة طهران",
+        "options.method.8":              "منطقة الخليج",
+        "options.method.9":              "الكويت",
+        "options.method.10":             "قطر",
+        "options.method.11":             "مجلس أوغاما الإسلامي، سنغافورة",
+        "options.method.12":             "اتحاد المنظمات الإسلامية في فرنسا",
+        "options.method.13":             "ديانة، تركيا",
+        "options.method.14":             "الإدارة الدينية لمسلمي روسيا",
+        "options.method.15":             "لجنة رؤية الهلال العالمية",
+        "options.iqama.title":           "تذكير الإقامة",
+        "options.iqama.enabled":         "ذكرني بوقت الإقامة (دقائق قابلة للتعديل بعد كل أذان)",
+        "options.iqama.offset.Fajr":     "الفجر — دقائق بعد الأذان",
+        "options.iqama.offset.Dhuhr":    "الظهر — دقائق بعد الأذان",
+        "options.iqama.offset.Asr":      "العصر — دقائق بعد الأذان",
+        "options.iqama.offset.Maghrib":  "المغرب — دقائق بعد الأذان",
+        "options.iqama.offset.Isha":     "العشاء — دقائق بعد الأذان",
+        "reciter.style.Mujawwad":        "مجوّد",
+        "reciter.style.Murattal":        "مرتّل",
         "options.display.title":         "العرض",
         "options.display.language":      "اللغة",
         "options.display.languageEn":    "English",
@@ -202,6 +297,11 @@ const STRINGS = {
         "reader.btnListen":         "▶ استمع",
         "reader.btnPause":          "⏸ إيقاف مؤقت",
         "reader.btnLoading":        "جارٍ التحميل…",
+        "reader.errorLoad":         "تعذر تحميل السورة {n}. تحقق من الاتصال.",
+        "reader.ayat":              "آيات",
+        "reader.surah":             "سورة",
+        "reader.revelation.Meccan": "مكية",
+        "reader.revelation.Medinan":"مدنية",
         // Hadith ---------------------------------------------------------
         "hadith.title":             "الحديث",
         "hadith.bookmarksEmpty":    "لا توجد إشارات بعد — اضغط 🔖 على أي حديث.",
@@ -229,6 +329,8 @@ const STRINGS = {
         "azkar.target":             "الهدف",
         "azkar.supplications":      "ذكرًا",
         "azkar.errorLoad":          "تعذر تحميل الأذكار. تحقق من الاتصال.",
+        "azkar.reset":              "إعادة تعيين",
+        "azkar.empty":              "—",
         // Radio ----------------------------------------------------------
         "radio.title":              "إذاعة القرآن",
         "radio.searchPlaceholder":  "ابحث في المحطات…",
@@ -261,6 +363,20 @@ export function t(key, fallback) {
     return STRINGS[currentLocale]?.[key]
         ?? STRINGS.en[key]
         ?? (fallback ?? key);
+}
+
+// Replace {placeholder} tokens in a template string with values from `vars`.
+// Used for notification messages that interpolate prayer names, counts, etc.
+export function format(template, vars) {
+    if (!vars) return String(template);
+    return String(template).replace(/\{(\w+)\}/g, (_, k) =>
+        Object.prototype.hasOwnProperty.call(vars, k) ? String(vars[k]) : `{${k}}`
+    );
+}
+
+// Convenience: lookup + interpolate in one call.
+export function tf(key, vars, fallback) {
+    return format(t(key, fallback), vars);
 }
 
 export function applyI18n(root = document) {

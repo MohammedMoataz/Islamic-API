@@ -8,7 +8,7 @@ import {
     playSurah, pauseAudio, resumeAudio, stopAudio, seekAudio,
     getAudioState, onAudioState
 } from "../scripts/audio-controller.js";
-import { bootstrapI18n, t } from "../scripts/i18n.js";
+import { bootstrapI18n, t, tf, getLocale } from "../scripts/i18n.js";
 import { bootstrapTheme } from "../scripts/theme.js";
 
 await Promise.all([bootstrapTheme(), bootstrapI18n()]);
@@ -128,7 +128,7 @@ function renderBookmarks() {
     if (state.bookmarks.length === 0) {
         const li = document.createElement("li");
         li.className = "empty";
-        li.textContent = "No bookmarks yet — tap 🔖 on any ayah.";
+        li.textContent = t("reader.bookmarksEmpty");
         els.bookmarksList.appendChild(li);
         return;
     }
@@ -180,7 +180,7 @@ async function openSurah(number) {
     } catch (err) {
         console.error(err);
         els.error.hidden = false;
-        els.error.textContent = `Failed to load surah ${number}. Check your connection.`;
+        els.error.textContent = tf("reader.errorLoad", { n: number });
     } finally {
         els.loading.hidden = true;
     }
@@ -189,9 +189,13 @@ async function openSurah(number) {
 function renderHeader(data) {
     els.header.hidden = false;
     els.nameAr.textContent = data.name;
-    els.meta.textContent =
-        `${data.englishName} · ${data.englishNameTranslation} · ` +
-        `${data.numberOfAyahs} ayat · ${data.revelationType}`;
+    const revelation = t(`reader.revelation.${data.revelationType}`, data.revelationType);
+    const ayat = t("reader.ayat");
+    // In Arabic, the API's englishName/englishNameTranslation are EN — the
+    // surah name (data.name) is already Arabic, so we drop the EN tokens.
+    els.meta.textContent = getLocale() === "ar"
+        ? `${data.numberOfAyahs} ${ayat} · ${revelation}`
+        : `${data.englishName} · ${data.englishNameTranslation} · ${data.numberOfAyahs} ${ayat} · ${revelation}`;
     // Surahs 1 and 9 omit the basmala.
     els.basmala.hidden = data.number === 1 || data.number === 9;
 }
@@ -256,18 +260,18 @@ async function toggleTafsir(ayahNumber) {
     state.expandedTafsir.add(ayahNumber);
     const tafsirEl = document.createElement("div");
     tafsirEl.className = "tafsir loading";
-    tafsirEl.textContent = "Loading tafsir…";
+    tafsirEl.textContent = t("reader.tafsirLoading");
     li.appendChild(tafsirEl);
 
     try {
         const tafsir = await fetchTafsir(state.tafsirSlug, state.currentSurah);
         const row = tafsir.find((r) => r.aya === ayahNumber);
         tafsirEl.classList.remove("loading");
-        tafsirEl.textContent = row?.translation || "Tafsir not available for this ayah.";
+        tafsirEl.textContent = row?.translation || t("reader.tafsirUnavailable");
     } catch (err) {
         console.error(err);
         tafsirEl.classList.remove("loading");
-        tafsirEl.textContent = "Failed to load tafsir. Check your connection.";
+        tafsirEl.textContent = t("reader.tafsirFailed");
     }
 }
 
@@ -283,7 +287,7 @@ async function handleBookmark(surah, ayah, rowEl) {
 // ------------------------------------------------------------ Resume / scroll
 
 function showResumeBanner(surah, ayah) {
-    els.resumeText.textContent = `Resumed at ${surah}:${ayah}`;
+    els.resumeText.textContent = `${t("reader.resumePrefix")} ${surah}:${ayah}`;
     els.resumeBanner.hidden = false;
 
     // Go = re-scroll to the saved ayah (or open the saved surah and scroll
@@ -418,14 +422,16 @@ async function onListenClick() {
         if (state.audio.playing) return pauseAudio();
         return resumeAudio();
     }
-    const title = `${data.englishName} · Surah ${data.number}`;
+    const surahLabel = t("reader.surah");
+    const titleName = getLocale() === "ar" ? data.name : data.englishName;
+    const title = `${titleName} · ${surahLabel} ${data.number}`;
     els.playSurahBtn.disabled = true;
-    els.playSurahBtn.textContent = "Loading…";
+    els.playSurahBtn.textContent = t("reader.btnLoading");
     try {
         await playSurah(state.reciterId, data.number, title);
     } catch (err) {
         console.error(err);
-        els.playSurahBtn.textContent = "▶ Listen";
+        els.playSurahBtn.textContent = t("reader.btnListen");
     } finally {
         els.playSurahBtn.disabled = false;
     }
@@ -454,11 +460,11 @@ function applyAudioState(audioState) {
         const isThis = audioState.surah === state.currentSurahData.number;
         els.playSurahBtn.classList.toggle("playing", isThis && audioState.playing);
         if (isThis && audioState.playing) {
-            els.playSurahBtn.textContent = "⏸ Pause";
+            els.playSurahBtn.textContent = t("reader.btnPause");
         } else if (isThis && audioState.loading) {
-            els.playSurahBtn.textContent = "Loading…";
+            els.playSurahBtn.textContent = t("reader.btnLoading");
         } else {
-            els.playSurahBtn.textContent = "▶ Listen";
+            els.playSurahBtn.textContent = t("reader.btnListen");
         }
     }
 }

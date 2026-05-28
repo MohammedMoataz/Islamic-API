@@ -120,6 +120,13 @@ function cleanText(s) {
     // 2) If the value still looks like a Python-list serialisation (single-
     //    quoted items separated by commas), extract each item and drop the
     //    junk ones.
+    //
+    //    Some upstream entries (e.g. categories "أدعية قرآنية" and
+    //    "أدعية الأنبياء") store the dhikr like
+    //      "\n', '\"text…\". [ref]\n', '\n', '\n', '\n', '"
+    //    Naive cleanup yields a salad of "," fragments. Require each surviving
+    //    item to contain at least one letter (Arabic or Latin), otherwise it's
+    //    just leftover separator characters.
     if (/'\s*,\s*'/.test(str)) {
         const items = [...str.matchAll(/'((?:\\'|[^'])*)'/g)].map((m) => m[1]);
         if (items.length) {
@@ -132,7 +139,7 @@ function cleanText(s) {
                     .replace(/[\r\n\t]+/g, " ")
                     .trim()
                 )
-                .filter((it) => it.length > 0);
+                .filter((it) => /[؀-ۿA-Za-z]/.test(it));
             str = cleaned.join(" ");
         }
     }

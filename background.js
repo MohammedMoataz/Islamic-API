@@ -15,10 +15,25 @@ import {
     fetchAzkar, getCounts, setCount, getNotifiedSet, markNotified, countKey
 } from "./scripts/azkar.js";
 import { dailyHadith, bookTitle } from "./scripts/hadith.js";
-import { loadLocale, t } from "./scripts/i18n.js";
+import { loadLocale, t, tf } from "./scripts/i18n.js";
 
 const ICON_URL = chrome.runtime.getURL("images/icon-128.png");
 const BADGE_COLOR = "#1a7f5a";
+
+// Stale-alarm thresholds — chrome.alarms persists across device sleep and
+// queues every alarm that passed during the sleep window. On wake we'd fire
+// the whole backlog (prayer + pre + iqama × N) without these guards. If an
+// alarm is older than its threshold when we handle it, we skip the notify.
+const STALE_PRAYER_MS = 10 * 60_000;
+const STALE_PRE_MS    =  5 * 60_000;
+const STALE_IQAMA_MS  = 10 * 60_000;
+const STALE_HADITH_MS = 60 * 60_000;
+const STALE_AZKAR_MS  = 30 * 60_000;
+
+function isStale(alarm, thresholdMs) {
+    const scheduled = alarm?.scheduledTime ?? Date.now();
+    return Date.now() - scheduled > thresholdMs;
+}
 
 chrome.runtime.onInstalled.addListener(() => scheduleToday());
 if (chrome.runtime.onStartup) {
@@ -34,21 +49,42 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
     }
     if (alarm.name.startsWith("prayer:")) {
         const name = alarm.name.slice("prayer:".length);
-        notify(`Prayer time: ${name}`, `${name} is now.`);
+        if (!isStale(alarm, STALE_PRAYER_MS)) {
+            await loadLocale();
+            const display = t(`prayer.${name}`, name);
+            notify(
+                tf("notif.prayer.title", { name: display }),
+                tf("notif.prayer.body",  { name: display })
+            );
+        }
         return updateBadge();
     }
     if (alarm.name.startsWith("pre:")) {
+        if (isStale(alarm, STALE_PRE_MS)) return;
         const [, name, mins] = alarm.name.split(":");
+        await loadLocale();
+        const display = t(`prayer.${name}`, name);
+        const plural = mins === "1" ? "" : "s";
         return notify(
-            `Upcoming prayer: ${name}`,
-            `${name} is in ${mins} minute${mins === "1" ? "" : "s"}.`
+            tf("notif.pre.title", { name: display }),
+            tf("notif.pre.body",  { name: display, mins, plural })
+        );
+    }
+    if (alarm.name.startsWith("iqama:")) {
+        if (isStale(alarm, STALE_IQAMA_MS)) return;
+        const name = alarm.name.slice("iqama:".length);
+        await loadLocale();
+        const display = t(`prayer.${name}`, name);
+        return notify(
+            tf("notif.iqama.title", { name: display }),
+            tf("notif.iqama.body",  { name: display })
         );
     }
     if (alarm.name === "azkar-tick") {
-        return onAzkarTick();
+        return onAzkarTick(alarm);
     }
     if (alarm.name === "hadith-daily") {
-        return onHadithDailyTick();
+        return onHadithDailyTick(alarm);
     }
 });
 
@@ -85,8 +121,10 @@ chrome.storage.onChanged.addListener((changes, area) => {
 // and orchestrate the offscreen audio document.
 chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
     if (msg?.type === "test-notification") {
-        notify("Test notification", "If you can see this, notifications are working.");
-        sendResponse({ ok: true });
+        loadLocale().then(() => {
+            notify(t("notif.test.title"), t("notif.test.body"));
+            sendResponse({ ok: true });
+        });
         return true;
     }
     if (msg?.type === "reschedule") {
@@ -164,6 +202,7 @@ async function scheduleToday() {
 
         if (settings.notifications.enabled) {
             const pre = settings.notifications.preMinutes;
+            const iqamaCfg = settings.notifications.iqama;
             for (const name of MAIN_PRAYERS) {
                 const hhmm = timings[name];
                 if (!hhmm) continue;
@@ -175,6 +214,15 @@ async function scheduleToday() {
                     const preAt = at - pre * 60_000;
                     if (preAt > Date.now()) {
                         chrome.alarms.create(`pre:${name}:${pre}`, { when: preAt });
+                    }
+                }
+                if (iqamaCfg?.enabled) {
+                    const offset = clampInt(iqamaCfg.offsets?.[name], 0, 60, 0);
+                    if (offset > 0) {
+                        const iqamaAt = at + offset * 60_000;
+                        if (iqamaAt > Date.now()) {
+                            chrome.alarms.create(`iqama:${name}`, { when: iqamaAt });
+                        }
                     }
                 }
             }
@@ -219,7 +267,7 @@ function scheduleNextAzkarTick(avgMin) {
     chrome.alarms.create("azkar-tick", { delayInMinutes: delayMin });
 }
 
-async function onAzkarTick() {
+async function onAzkarTick(alarm) {
     // Reschedule first so the user keeps getting reminders even if the network
     // is down or the dhikr fetch errors out.
     let avg = 180;
@@ -230,6 +278,10 @@ async function onAzkarTick() {
     } finally {
         scheduleNextAzkarTick(avg);
     }
+
+    // If this tick was queued during device sleep and we're now well past its
+    // intended firing time, skip — we already rescheduled the next one.
+    if (isStale(alarm, STALE_AZKAR_MS)) return;
 
     const kind = await activeAzkarWindow();
     if (!kind) return;
@@ -267,7 +319,10 @@ async function onAzkarTick() {
         const item = pick.item;
         const text = item.zekr || "";
         const message = text.length > 220 ? text.slice(0, 220) + "…" : text;
-        const title = kind === "morning" ? "Morning Azkar" : "Evening Azkar";
+        await loadLocale();
+        const title = kind === "morning"
+            ? t("notif.azkar.morning")
+            : t("notif.azkar.evening");
 
         // One notification id per kind so a fresh reminder replaces the
         // previous one rather than piling up.
@@ -276,7 +331,7 @@ async function onAzkarTick() {
             iconUrl: ICON_URL,
             title,
             message,
-            contextMessage: `Repeat × ${item.count}`,
+            contextMessage: tf("notif.azkar.repeat", { count: item.count }),
             priority: 1
         });
 
@@ -343,7 +398,7 @@ function nextDailyAt(hour, minute) {
     return target.getTime();
 }
 
-async function onHadithDailyTick() {
+async function onHadithDailyTick(alarm) {
     // Reschedule for tomorrow first so a fetch failure doesn't break the cadence.
     let cfg = null;
     try {
@@ -358,6 +413,7 @@ async function onHadithDailyTick() {
         console.warn("hadith-daily: getSettings failed", err?.message ?? err);
     }
     if (!cfg?.enabled) return;
+    if (isStale(alarm, STALE_HADITH_MS)) return;
 
     try {
         const settings = await getSettings();

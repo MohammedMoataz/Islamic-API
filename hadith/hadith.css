@@ -38,7 +38,7 @@ html, body {
 
 .brand {
     margin: 0;
-    font-size: 1.1rem;
+    font-size: var(--fs-h2);
     font-weight: 600;
     color: var(--accent);
     letter-spacing: 0.02em;
@@ -47,7 +47,7 @@ html, body {
 .topbar-link {
     color: var(--accent);
     text-decoration: none;
-    font-size: 0.9rem;
+    font-size: var(--fs-sm);
 }
 
 .topbar-link:hover { text-decoration: underline; }
@@ -171,13 +171,13 @@ html, body {
 
 #book-title {
     margin: 0 0 4px;
-    font-size: 1.6rem;
+    font-size: var(--fs-h1);
 }
 
 .book-meta {
     margin: 0;
     color: var(--muted);
-    font-size: 0.9rem;
+    font-size: var(--fs-sm);
 }
 
 .pager {
@@ -257,13 +257,13 @@ html, body {
     display: inline-block;
     color: var(--accent);
     font-weight: 700;
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     margin-bottom: 8px;
 }
 
 .hadith-arab {
     font-family: "Amiri Quran", "Scheherazade New", "Traditional Arabic", serif;
-    font-size: 1.45rem;
+    font-size: var(--fs-arabic);
     line-height: 2.2;
     direction: rtl;
     text-align: justify;
@@ -272,7 +272,7 @@ html, body {
 }
 
 .hadith-id {
-    font-size: 0.95rem;
+    font-size: var(--fs-base);
     line-height: 1.6;
     color: var(--fg);
     margin: 0;

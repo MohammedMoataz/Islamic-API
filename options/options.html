@@ -43,21 +43,21 @@
             <label>
                 <span data-i18n="options.location.method">Calculation method</span>
                 <select id="method">
-                    <option value="0">Shia Ithna-Ashari, Leva Institute, Qum</option>
-                    <option value="1">University of Islamic Sciences, Karachi</option>
-                    <option value="2">Islamic Society of North America</option>
-                    <option value="3">Muslim World League</option>
-                    <option value="4">Umm Al-Qura University, Makkah</option>
-                    <option value="5">Egyptian General Authority of Survey</option>
-                    <option value="7">Institute of Geophysics, University of Tehran</option>
-                    <option value="8">Gulf Region</option>
-                    <option value="9">Kuwait</option>
-                    <option value="10">Qatar</option>
-                    <option value="11">Majlis Ugama Islam Singapura, Singapore</option>
-                    <option value="12">Union Organization Islamic de France</option>
-                    <option value="13">Diyanet İşleri Başkanlığı, Turkey</option>
-                    <option value="14">Spiritual Administration of Muslims of Russia</option>
-                    <option value="15">Moonsighting Committee Worldwide</option>
+                    <option value="0" data-i18n="options.method.0">Shia Ithna-Ashari, Leva Institute, Qum</option>
+                    <option value="1" data-i18n="options.method.1">University of Islamic Sciences, Karachi</option>
+                    <option value="2" data-i18n="options.method.2">Islamic Society of North America</option>
+                    <option value="3" data-i18n="options.method.3">Muslim World League</option>
+                    <option value="4" data-i18n="options.method.4">Umm Al-Qura University, Makkah</option>
+                    <option value="5" data-i18n="options.method.5">Egyptian General Authority of Survey</option>
+                    <option value="7" data-i18n="options.method.7">Institute of Geophysics, University of Tehran</option>
+                    <option value="8" data-i18n="options.method.8">Gulf Region</option>
+                    <option value="9" data-i18n="options.method.9">Kuwait</option>
+                    <option value="10" data-i18n="options.method.10">Qatar</option>
+                    <option value="11" data-i18n="options.method.11">Majlis Ugama Islam Singapura, Singapore</option>
+                    <option value="12" data-i18n="options.method.12">Union Organization Islamic de France</option>
+                    <option value="13" data-i18n="options.method.13">Diyanet İşleri Başkanlığı, Turkey</option>
+                    <option value="14" data-i18n="options.method.14">Spiritual Administration of Muslims of Russia</option>
+                    <option value="15" data-i18n="options.method.15">Moonsighting Committee Worldwide</option>
                 </select>
             </label>
         </section>
@@ -73,6 +73,34 @@
                 <input id="notif-pre" type="number" min="0" max="60" step="1">
             </label>
             <button id="test-notif" type="button" class="btn-secondary" data-i18n="options.notifications.test">Send test notification</button>
+        </section>
+
+        <section class="card">
+            <h2 data-i18n="options.iqama.title">Iqama reminders</h2>
+            <label class="row">
+                <input id="iqama-enabled" type="checkbox">
+                <span data-i18n="options.iqama.enabled">Notify me at iqama time (configurable minutes after each adhan)</span>
+            </label>
+            <label>
+                <span data-i18n="options.iqama.offset.Fajr">Fajr — minutes after adhan</span>
+                <input id="iqama-Fajr" type="number" min="0" max="60" step="1">
+            </label>
+            <label>
+                <span data-i18n="options.iqama.offset.Dhuhr">Dhuhr — minutes after adhan</span>
+                <input id="iqama-Dhuhr" type="number" min="0" max="60" step="1">
+            </label>
+            <label>
+                <span data-i18n="options.iqama.offset.Asr">Asr — minutes after adhan</span>
+                <input id="iqama-Asr" type="number" min="0" max="60" step="1">
+            </label>
+            <label>
+                <span data-i18n="options.iqama.offset.Maghrib">Maghrib — minutes after adhan</span>
+                <input id="iqama-Maghrib" type="number" min="0" max="60" step="1">
+            </label>
+            <label>
+                <span data-i18n="options.iqama.offset.Isha">Isha — minutes after adhan</span>
+                <input id="iqama-Isha" type="number" min="0" max="60" step="1">
+            </label>
         </section>
 
         <section class="card">
@@ -100,14 +128,14 @@
             <label>
                 <span data-i18n="options.azkar.interval">Average minutes between reminders (random within ±50%)</span>
                 <select id="azkar-interval">
-                    <option value="15">~ 15 minutes</option>
-                    <option value="30">~ 30 minutes</option>
-                    <option value="60">~ 1 hour</option>
-                    <option value="90">~ 1.5 hours</option>
-                    <option value="120">~ 2 hours</option>
-                    <option value="180">~ 3 hours</option>
-                    <option value="240">~ 4 hours</option>
-                    <option value="360">~ 6 hours</option>
+                    <option value="15" data-i18n="options.azkar.interval.15">~ 15 minutes</option>
+                    <option value="30" data-i18n="options.azkar.interval.30">~ 30 minutes</option>
+                    <option value="60" data-i18n="options.azkar.interval.60">~ 1 hour</option>
+                    <option value="90" data-i18n="options.azkar.interval.90">~ 1.5 hours</option>
+                    <option value="120" data-i18n="options.azkar.interval.120">~ 2 hours</option>
+                    <option value="180" data-i18n="options.azkar.interval.180">~ 3 hours</option>
+                    <option value="240" data-i18n="options.azkar.interval.240">~ 4 hours</option>
+                    <option value="360" data-i18n="options.azkar.interval.360">~ 6 hours</option>
                 </select>
             </label>
             <p class="card-note" data-i18n="options.azkar.note">

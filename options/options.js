@@ -1,10 +1,12 @@
 import { getSettings, setSettings, DEFAULT_SETTINGS, TAFSIR_EDITIONS, HADITH_BOOKS } from "../scripts/settings.js";
 import { COUNTRIES, citiesFor } from "../scripts/locations.js";
 import { fetchReciters } from "../scripts/quran-audio.js";
-import { bootstrapI18n, t } from "../scripts/i18n.js";
+import { bootstrapI18n, t, getLocale } from "../scripts/i18n.js";
 import { bootstrapTheme } from "../scripts/theme.js";
 
 await Promise.all([bootstrapTheme(), bootstrapI18n()]);
+
+const PRAYERS = ["Fajr", "Dhuhr", "Asr", "Maghrib", "Isha"];
 
 const els = {
     country: document.getElementById("country"),
@@ -20,6 +22,10 @@ const els = {
     hadithDailyTime: document.getElementById("hadith-daily-time"),
     azkarReminders: document.getElementById("azkar-reminders"),
     azkarInterval: document.getElementById("azkar-interval"),
+    iqamaEnabled: document.getElementById("iqama-enabled"),
+    iqamaOffsets: Object.fromEntries(PRAYERS.map(
+        (p) => [p, document.getElementById(`iqama-${p}`)]
+    )),
     language: document.getElementById("language"),
     theme: document.getElementById("theme"),
     saveBtn: document.getElementById("save-btn"),
@@ -37,8 +43,9 @@ let pristine = null;       // snapshot of saved values, used to detect dirtiness
     applyToForm(s);
 
     // Reciter list comes from the network — populate it after the rest of the
-    // form is up so the page isn't gated on it.
-    fetchReciters().then((reciters) => {
+    // form is up so the page isn't gated on it. Pass the user's locale so
+    // api.quran.com returns Arabic-translated names when language=ar.
+    fetchReciters(getLocale()).then((reciters) => {
         populateReciters(reciters, s.audio?.reciterId ?? DEFAULT_SETTINGS.audio.reciterId);
         // If the user hasn't touched anything, refresh the pristine snapshot
         // so opening + closing doesn't look "dirty".
@@ -63,7 +70,7 @@ function populateTafsirEditions() {
 
 function populateHadithBooks() {
     els.hadithBook.innerHTML = HADITH_BOOKS
-        .map((b) => `<option value="${escapeHtml(b.slug)}">${escapeHtml(b.name)}</option>`)
+        .map((b) => `<option value="${escapeHtml(b.slug)}">${escapeHtml(t(`hadith.book.${b.slug}`, b.name))}</option>`)
         .join("");
 }
 
@@ -71,7 +78,7 @@ function populateReciters(reciters, selectedId) {
     els.reciter.innerHTML = reciters
         .map((r) => {
             const label = r.translated_name?.name || r.reciter_name || `Reciter ${r.id}`;
-            const style = r.style ? ` (${escapeHtml(r.style)})` : "";
+            const style = r.style ? ` (${escapeHtml(t(`reciter.style.${r.style}`, r.style))})` : "";
             return `<option value="${r.id}">${escapeHtml(label)}${style}</option>`;
         })
         .join("");
@@ -115,6 +122,12 @@ function applyToForm(s) {
     if ([...els.azkarInterval.options].some((o) => o.value === knownInterval)) {
         els.azkarInterval.value = knownInterval;
     }
+    els.iqamaEnabled.checked = !!s.notifications?.iqama?.enabled;
+    for (const p of PRAYERS) {
+        const v = s.notifications?.iqama?.offsets?.[p]
+            ?? DEFAULT_SETTINGS.notifications.iqama.offsets[p];
+        els.iqamaOffsets[p].value = String(v);
+    }
     els.language.value = s.language === "ar" ? "ar" : "en";
     els.theme.value = ["auto", "light", "dark"].includes(s.theme) ? s.theme : "auto";
 }
@@ -134,6 +147,10 @@ function snapshotForm() {
         hadithDailyTime: els.hadithDailyTime.value,
         azkarReminders: els.azkarReminders.checked,
         azkarInterval: els.azkarInterval.value,
+        iqamaEnabled: els.iqamaEnabled.checked,
+        iqamaOffsets: Object.fromEntries(
+            PRAYERS.map((p) => [p, els.iqamaOffsets[p].value])
+        ),
         language: els.language.value,
         theme: els.theme.value
     });
@@ -180,7 +197,18 @@ async function save() {
                 0,
                 60,
                 DEFAULT_SETTINGS.notifications.preMinutes
-            )
+            ),
+            iqama: {
+                enabled: els.iqamaEnabled.checked,
+                offsets: Object.fromEntries(PRAYERS.map((p) => [
+                    p,
+                    clampInt(
+                        els.iqamaOffsets[p].value,
+                        0, 60,
+                        DEFAULT_SETTINGS.notifications.iqama.offsets[p]
+                    )
+                ]))
+            }
         },
         quran: {
             tafsirSlug: els.tafsirSlug.value || DEFAULT_SETTINGS.quran.tafsirSlug,
@@ -240,7 +268,14 @@ els.country.addEventListener("change", () => {
 });
 
 // Any other change just toggles dirty UI.
-[els.city, els.method, els.notifEnabled, els.notifPre, els.tafsirSlug, els.tafsirDefault, els.reciter, els.hadithBook, els.hadithDailyEnabled, els.hadithDailyTime, els.azkarReminders, els.azkarInterval, els.language, els.theme].forEach((el) => {
+[
+    els.city, els.method, els.notifEnabled, els.notifPre,
+    els.tafsirSlug, els.tafsirDefault, els.reciter,
+    els.hadithBook, els.hadithDailyEnabled, els.hadithDailyTime,
+    els.azkarReminders, els.azkarInterval,
+    els.iqamaEnabled, ...Object.values(els.iqamaOffsets),
+    els.language, els.theme
+].forEach((el) => {
     el.addEventListener("change", updateDirtyUI);
     el.addEventListener("input", updateDirtyUI);
 });

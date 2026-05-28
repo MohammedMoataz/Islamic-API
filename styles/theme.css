@@ -2,6 +2,23 @@
    stylesheet so :root[data-theme="dark"] selectors override the page's
    light defaults, and the keyboard-focus rule applies everywhere. */
 
+/* Font-size tokens — single source of truth for type scale across pages.
+   Page CSS should reference these instead of hardcoding rem values. */
+:root {
+    --fs-xs:          0.82rem;
+    --fs-sm:          0.92rem;
+    --fs-base:        1.02rem;
+    --fs-meta:        1.0rem;
+    --fs-label:       0.78rem;
+    --fs-h2:          1.3rem;
+    --fs-h1:          1.55rem;
+    --fs-arabic:      1.7rem;     /* hadith body, azkar dhikr */
+    --fs-arabic-lg:   1.85rem;    /* reader ayah */
+    --fs-arabic-sm:   1.2rem;     /* popup hadith preview */
+    --fs-basmala:     2.2rem;
+    --fs-surah-name:  2.6rem;
+}
+
 button:focus-visible,
 a:focus-visible,
 input:focus-visible,

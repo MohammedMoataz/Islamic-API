@@ -100,9 +100,12 @@ function buildDhikrCard(category, index, item) {
     if (done) li.classList.add("done");
 
     const referenceLine = item.reference || item.description;
+    // Some upstream entries arrive empty after normalisation. Show a
+    // placeholder rather than letting a malformed reference line stand alone.
+    const zekrText = item.zekr || t("azkar.empty");
 
     li.innerHTML = `
-        <p class="dhikr-text">${escapeHtml(item.zekr)}</p>
+        <p class="dhikr-text">${escapeHtml(zekrText)}</p>
         ${referenceLine ? `<p class="dhikr-meta">${escapeHtml(referenceLine)}</p>` : ""}
         <div class="dhikr-controls">
             <button class="tasbih${done ? " done" : ""}" type="button"
@@ -111,7 +114,7 @@ function buildDhikrCard(category, index, item) {
                 <span class="tasbih-target">${escapeHtml(t("azkar.target"))}: ${item.count}</span>
                 <span class="tasbih-hint">${escapeHtml(done ? t("azkar.completed") : t("azkar.tapHint"))}</span>
             </div>
-            <button class="btn-reset" type="button" aria-label="Reset" title="Reset">↻</button>
+            <button class="btn-reset" type="button" aria-label="${escapeHtml(t("azkar.reset"))}" title="${escapeHtml(t("azkar.reset"))}">↻</button>
         </div>
     `;
 
